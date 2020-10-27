@@ -1,25 +1,170 @@
 #:kivy 1.0.9
 
+<PanelHeader>:
+    rows:1
+    text: 'no text defined'
+    colour_background: 0,0,0,1
+    font_size: 15
+    canvas:
+        Color: 
+            rgba: self.colour_background
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Label:
+        size: root.size
+        pos: root.pos
+        text: root.text
+        font_size: self.font_size
+
+
+
+<ButtonPanel>:
+    rows: 3
+    cols: 3
+    Button:
+        text: 'ARM'
+    Label:
+    Label:
+    Label:
+    Label:
+    Label:
+
+<CameraFeed>:
+    rows: 1
+    Label:
+        font_size: 15
+        text: 'No Camera Feed available'
+
+<TerminalInput>:
+    textInput: textInput
+    rows: 1
+    background_col: 0.1,0.1,0.1,1  
+    text_col: 0.333, 1, 0.160, 1
+    MyTextInput:
+        id: textInput
+        text: '>'
+        multiline: False
+        focus: True
+        background_color: self.parent.background_col 
+        foreground_color: self.parent.text_col
+        cursor_color: self.parent.text_col
+
+<TerminalLog>:
+    textLog: textLog
+    rows: 1
+    background_col: 0.1,0.1,0.15,1 
+    text_col: 0.333, 1, 0.160, 1
+    canvas:
+        Color: 
+            rgb: self.background_col
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Label:
+        id: textLog
+        halign: 'left'
+        valign: 'top'
+        text_size: root.width, None
+        center_x: root.center_x
+        center_y: root.center_y
+        text: 'this is the terminal log widget'
+        background_color: self.parent.background_col
+        color: self.parent.text_col
+        
+
+<Terminal>:
+    terminalInput: terminalInput
+    textInput: terminalInput.textInput
+    textLog: terminalLog.textLog
+    focus_next: terminalInput.textInput
+    rows: 3
+    background_col: 0.1,0.1,0.15,1  
+    text_col: 0.160, 1, 0.870,1
+    PanelHeader:
+        size_hint: 1,0.1
+        font_size: 15
+        colour_background: 0.05,0.05,0.075,1 
+        text: 'Serial Terminal'
+    TerminalLog:
+        id: terminalLog
+        size_hint: 1,0.77
+        background_col: self.parent.background_col
+        text_col: self.parent.text_col
+
+    TerminalInput:
+        id: terminalInput
+        size_hint: 1,0.13
+        background_col: self.parent.background_col
+        text_col: self.parent.text_col
+
 <Instrument>:
     name: 'Instrument x'
     size: 50, 50
+    reading: 10.0 #reading gauge displays from 0 to 100 (%) 
+    maxReading: 100.0
+    minReading: -100.0
+    gaugeStartAngle: 180.0
+    gaugeEndAngle: 360.0
+    reading_sub: 0.00
+    maxReading_sub: 100.0
+    minReading_sub: -100.0
+    gaugeStartAngle_sub: 90.0
+    gaugeEndAngle_sub: 270.0
+    
     canvas:
+        #sets backdrop line of main reading 
         Color:
-            rgb: 0, 0.5, 0.4
-        Ellipse:
-            pos:self.pos
-            size:self.width, self.width
-    Label:
+            rgba: 0, 0.5, 0.4, 0.3
+        Line:
+            width: 8.0
+            cap: 'none'
+            circle:
+                (self.center_x+10, self.center_y-30, min(self.width, self.width)
+                / 2 -3, self.gaugeStartAngle,self.gaugeEndAngle)
+        #sets actual value line of main reading 
+        Color:
+            rgba: 0, 0.5, 0.4, 1
+        Line:
+            width: 8.0
+            cap: 'none'
+            circle:
+                (self.center_x+10, self.center_y-30, min(self.width, self.width)
+                / 2 -3, (self.gaugeEndAngle - self.gaugeStartAngle)/2 + self.gaugeStartAngle,(self.reading/(self.maxReading-self.minReading)) *(self.gaugeEndAngle-self.gaugeStartAngle) + self.gaugeStartAngle + (self.gaugeEndAngle - self.gaugeStartAngle)/2)
+        #sets actual reading line of sub reading 
+        Color:
+            rgba: 0.878, 0.4, 0, 1
+        Line:
+            width: 2.0
+            cap: 'none'
+            circle:
+                (self.center_x+10, self.center_y-30, min(self.width, self.width)*0.75
+                / 2 -3, (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2 + self.gaugeStartAngle_sub,(self.reading_sub/(self.maxReading_sub-self.minReading_sub)) *(self.gaugeEndAngle_sub-self.gaugeStartAngle_sub) + self.gaugeStartAngle_sub + (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2)
+    #display main reading as a number 
+    Label: 
+        font_size: 25
+        color: 1,1,1,1
+        pos: root.center_x-40, root.center_y-80
+        text: str(root.reading)
+    Label: 
         font_size: 18
+        color: 0.5,0.5,0.5,1
+        pos: root.center_x-40, root.center_y-100
+        text: '('+str(root.reading_sub)+')'
+    Label:
+        font_size: 12
         center_x: root.center_x
         center_y: root.top-25
         text: self.parent.name
 
 <InstrumentPanel>:
-    #instrument1: barometer
-    #instrument1: compass
+    instrument1: inst_1
+    instrument2: inst_2
+    instrument3: inst_3
+    instrument4: inst_4
+
     name: 'panelName'
-    backgroundColour: 0.5, 0.5, 0.5,1
+    backgroundColour: 0.1,0.1,0.15,1  
     rows:2
     canvas:
         Color:
@@ -27,36 +172,29 @@
         Rectangle:
             size: root.size
             pos: self.pos
-    Label:
-        size_hint: 1,0.1
+    PanelHeader:
+        size_hint: 1,0.1            
         text: self.parent.name
+        colour_background: 0.05,0.05,0.075,1 
     GridLayout:
         cols: 10
         Instrument:
+            id: inst_1
             name: 'Instrument 1'
         Instrument:
+            id: inst_2
             name: 'Instrument 2'
         Instrument: 
+            id: inst_3
             name: 'Instrument 3'
         Instrument: 
+            id: inst_4
             name: 'Instrument 4'
-
-    #Label:
-    #    font_size: 25
-    #    center_x: self.parent.center_x
-    #    top: root.top
-    #    text: "panel"
-    #Instrument:
-    #    id: barometer
-    #    x: root.center_x - self.width +50
-    #    center_y: root.center_y 
-    #Instrument:
-    #    id: compass
-    #    x: root.center_x + self.width +50
-    #    center_y: root.center_y
 
 <CommandWidget>:
     #panel1: layout_a.instrumentPanel
+    motorPanel: motorPanel
+    terminal: terminal
     rows: 2
     canvas:
         #Rectangle:
@@ -73,23 +211,28 @@
     GridLayout:
         cols: 2
         GridLayout:
-            size_hint: 0.6,1
+            size_hint: 0.7,1
             rows:2
             InstrumentPanel:
                 name: 'Instrument Panel'
-                backgroundColour: 0.2,0.2,0.2,1
             GridLayout:
                 cols: 2
                 InstrumentPanel:
+                    id: motorPanel
                     size_hint: 0.6,1
                     name: 'Motor Feedback'
-                    backgroundColour: 0.1,0.1,0.1,1
-                Button:
-                    size_hint: 0.35,1
-            
-        Button:
+                Terminal:
+                    id: terminal
+                    size_hint: 0.4,1
+        GridLayout:
+            rows: 2
             size_hint: 0.35,1
             text: 'right half2'
+            CameraFeed:
+                size_hint: 1,0.5
+            ButtonPanel: 
+                size_hint: 1,0.5
+            
 
         
         

@@ -2,6 +2,10 @@
 #Various Commands used to interact with the telemetry of the drone
 import serial
 ###NOTE: MAKE SURE DRONE SENDS EXACT TELEMETRY SPLIT STATEMENTS (E.G Altitude:) or program may hang
+
+def sendPacket(ser, message):
+    ser.write(message)
+
 def ReadAltitude(ser):
     print("waiting for altitude telemetry...")
     telem_in = ser.read_until("ALTBREAK")#waits until altitude data given

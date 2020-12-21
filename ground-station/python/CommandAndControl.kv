@@ -20,12 +20,19 @@
 
 
 <ButtonPanel>:
+    radio_connect_button: radio_connect_button
+    radio_port_input: radio_port_input
     rows: 3
     cols: 3
     Button:
         text: 'ARM'
-    Label:
-    Label:
+    Button:
+        id: radio_connect_button
+        text: 'Connect to radio'
+
+    TextInput:
+        id: radio_port_input
+        text: 'select radio com port'
     Label:
     Label:
     Label:
@@ -106,11 +113,13 @@
     minReading: -100.0
     gaugeStartAngle: 180.0
     gaugeEndAngle: 360.0
+    gaugeColor: 0, 0.5, 0.4, 1
     reading_sub: 0.00
     maxReading_sub: 100.0
     minReading_sub: -100.0
     gaugeStartAngle_sub: 90.0
     gaugeEndAngle_sub: 270.0
+    gaugeColor_sub: 0.878, 0.4, 0, 1
     
     canvas:
         #sets backdrop line of main reading 
@@ -124,7 +133,7 @@
                 / 2 -3, self.gaugeStartAngle,self.gaugeEndAngle)
         #sets actual value line of main reading 
         Color:
-            rgba: 0, 0.5, 0.4, 1
+            rgba: root.gaugeColor
         Line:
             width: 8.0
             cap: 'none'
@@ -133,7 +142,7 @@
                 / 2 -3, (self.gaugeEndAngle - self.gaugeStartAngle)/2 + self.gaugeStartAngle,(self.reading/(self.maxReading-self.minReading)) *(self.gaugeEndAngle-self.gaugeStartAngle) + self.gaugeStartAngle + (self.gaugeEndAngle - self.gaugeStartAngle)/2)
         #sets actual reading line of sub reading 
         Color:
-            rgba: 0.878, 0.4, 0, 1
+            rgba: root.gaugeColor_sub
         Line:
             width: 2.0
             cap: 'none'
@@ -159,6 +168,7 @@
 
 <InstrumentPanel>:
     instrument1: inst_1
+    inst_1_gaugeColor: 0, 0.5, 0.4, 1
     instrument2: inst_2
     instrument3: inst_3
     instrument4: inst_4
@@ -181,6 +191,7 @@
         Instrument:
             id: inst_1
             name: 'Instrument 1'
+            gaugeColor: root.inst_1_gaugeColor
         Instrument:
             id: inst_2
             name: 'Instrument 2'
@@ -221,6 +232,7 @@
                     id: motorPanel
                     size_hint: 0.6,1
                     name: 'Motor Feedback'
+                    #inst_1_gaugeColor: 163, 142, 3,1
                 Terminal:
                     id: terminal
                     size_hint: 0.4,1

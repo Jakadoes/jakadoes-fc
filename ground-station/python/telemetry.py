@@ -6,6 +6,10 @@ import serial
 def sendPacket(ser, message):
     ser.write(message)
 
+def RawRead(ser):
+    telem_in = ser.read()
+    return telem_in
+    
 def ReadAltitude(ser):
     print("waiting for altitude telemetry...")
     telem_in = ser.read_until("ALTBREAK")#waits until altitude data given

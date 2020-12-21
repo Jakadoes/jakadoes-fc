@@ -1,4 +1,6 @@
+#Created by Damien Sabljak
 #only works with python 3.5 to 3.7
+#kivy imports 
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.properties import (
@@ -11,9 +13,14 @@ from kivy.core.window import Window
 from kivy.uix.textinput import TextInput
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors.focus import FocusBehavior
-import telemetry as telem
+#pip or naitive imports
 import serial
 import time 
+#user defined imports 
+from terminal import Terminal
+import telemetry as telem
+
+
 
 
 class GamepadHandler(object):
@@ -75,12 +82,24 @@ class GamepadHandler(object):
 
 class SerialHandler():
     READTIMEOUT = 3 #sets read timeout in seconds, set 0 to non-block
-    ser = serial.Serial('COM6', timeout=READTIMEOUT)  # open serial port
-    ser.baudrate = 57600 
-    print(ser.name)         # check which port was really used
+    isConnected = False
+    ser = None
+    rx_buffer = None
+
+    def ConnectToRadio(self, comNum):
+        self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT)  # open serial port
+        self.ser.baudrate = 57600 
+        print(self.ser.name)         # check which port was really used
+        self.isConnected = True
+    
+    def RawRead(self):
+        #returns bytes of serial data 
+        telem_in = telem.RawRead(self.ser)
+        self.rx_buffer = telem_in
 
     def sendRawPacket(self, message):
         telem.sendPacket(self.ser, message.encode('utf-8'))
+
     def sendMotorCommand(self, axisid, value):
         telem.sendPacket(self.ser, (str(axisid) +" "+ str(value)).encode('utf-8'))
     
@@ -94,60 +113,27 @@ class PanelHeader(GridLayout):
         pass
 
 class ButtonPanel(GridLayout):
-    def getFeedBack(self):
-        pass
+    app = None #stores refferences to app, to access other members 
+    radio_connect_button = ObjectProperty(None)
+    radio_port_input = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(ButtonPanel, self).__init__(**kwargs)
+        Clock.schedule_once(self.after_init)#provide ref to app after inits 
+        
+    def after_init(self, dt):
+        self.radio_connect_button.bind(on_press = self.ConnectToRadio)
+        self.app= App.get_running_app()
+        if(self.app == None):
+            print('WARNING: refference to app was not made, null pointers may occur')
+    
+    def ConnectToRadio(self, trashVariable):#button event passes two arguments, but none needed
+        print("connect to radio button panel method called..")
+        self.app.root.serialHandler.ConnectToRadio(int(self.radio_port_input.text))
 
 class CameraFeed(GridLayout):
     def getFeedBack(self):
         pass
-
-class Terminal(FocusBehavior, GridLayout):
-    focus_next = ObjectProperty(None)
-    terminalInput = ObjectProperty(None)
-    textInput = ObjectProperty(None)
-    textLog = ObjectProperty(None)
-    app = None
-
-    def __init__(self, **kwargs):
-        super(Terminal, self).__init__(**kwargs)
-        Clock.schedule_once(self.after_init)#provide ref to app after inits 
-
-    def after_init(self, dt): #provide refference to app after initializations
-        self.app= App.get_running_app()
-        if(self.app == None):
-            print('WARNING: refference to app was not made, null pointers may occur')
-
-    def RefocusInput(self, event):
-        self.get_focus_next().focus = True
-    #collect input data from input once entered
-    
-    def LogMessage(self, message):
-        print(message)
-        self.textLog.text = self.textLog.text + '\n' + message
-
-        #delete old text if it doesnt fit on panel
-        if(self.textLog.texture_size[1]+20 > self.textLog.size[1]):
-            for i in range(2): #max timeout: 100
-                self.textLog.text = self.textLog.text.split('\n',1)[1]
-                if(self.textLog.texture_size[1] < self.textLog.size[1]): #pretty sure this part does nothing 
-                    break
-        #to do: add handling capabilities for multi-line messages based on log width
-    #process text input into terminal 
-    def on_enter(self, instance):
-        print(instance.text)
-
-        self.LogMessage(instance.text)
-        print(self.app)
-        self.app.root.serialHandler.sendRawPacket(instance.text)
-        instance.text = '>'#reset after enter
-        Clock.schedule_once(self.RefocusInput) #keep input selected after pressing enter
-    
-
-class TerminalLog(GridLayout, StencilView): #create as stencil view to mask label widget going out of box 
-    pass
-
-class TerminalInput(GridLayout):
-    pass
 
 class Instrument(Widget):
     reading = NumericProperty(0)
@@ -170,7 +156,6 @@ class InstrumentPanel(GridLayout):
     def GetReadings(self):
         self.instrument1.GetReading()
         
-
 class CommandWidget(GridLayout):
     motorPanel = ObjectProperty(None)
     terminal = ObjectProperty(None)
@@ -181,10 +166,11 @@ class CommandWidget(GridLayout):
         pass
 
     def update(self, dt):
-        pass
+        #print(dt) #dt is time between update() calls (in seconds)
+        if(self.serialHandler.isConnected):
+            self.serialHandler.RawRead()
+        self.terminal.HandleTerminal()
     
-
-
 class CommandAndControlApp(App):
     def build(self):
         Command = CommandWidget()
@@ -192,7 +178,7 @@ class CommandAndControlApp(App):
         #bind events
         Window.bind(on_joy_axis=Command.gamepadHandler.on_joy_axis)
         Command.terminal.textInput.bind(on_text_validate=Command.terminal.on_enter) #bind events to terminal log input 
-        Clock.schedule_interval(Command.update, 1.0 / 60.0)
+        Clock.schedule_interval(Command.update, 1.0 / 1.0) #set update interval (in seconds i think)
         return Command
 
 

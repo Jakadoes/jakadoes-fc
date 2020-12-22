@@ -1,0 +1,6 @@
+[submodule "flight-controller/Drivers/c_library_v2"]
+	path = flight-controller/Drivers/c_library_v2
+	url = https://github.com/mavlink/c_library_v2.git
+[submodule "fc/Drivers/c_library_v2"]
+	path = fc/Drivers/c_library_v2
+	url = https://github.com/mavlink/c_library_v2.git

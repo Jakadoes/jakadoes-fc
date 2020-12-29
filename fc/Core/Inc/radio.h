@@ -13,6 +13,7 @@
 #include "stdint.h"
 
 
-void radio_transmit_raw(uint8_t* message){
+void Radio_Transmit_Raw(uint8_t* message, uint16_t messageSize);
+void Radio_Recieve_Raw(uint8_t* messageDestination, int numBytesToRecieve);
 
 #endif /* INC_RADIO_H_ */

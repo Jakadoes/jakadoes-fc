@@ -63,6 +63,11 @@ static void MX_TIM4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+enum DroneMode{
+	DISARMED,
+	ARMED
+};
+
 int main(void)
 {
 	//initialize modules
@@ -86,14 +91,23 @@ int main(void)
 	uint16_t pulse_width = 7;
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 	char tx_buffer[4] = "Hl\r\n";
-	char rx_buffer[4] = "0000";
+	char rx_buffer[4] = "test";
+
 	//HAL_Delay(3000);//wait for ESC's to arm
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
+
 	while(1){
-		radio_transmit_raw((uint8_t*) &rx_buffer);
-		radio_recieve_raw((uint8_t*) &rx_buffer);
-		HAL_Delay(1);
+		//HAL_UART_Transmit(&huart1,(uint8_t*) &rx_buffer, sizeof(rx_buffer),HAL_MAX_DELAY);
+		//HAL_Delay(1);
+		//Radio_Transmit_Raw((uint8_t*) &rx_buffer, 4);
+		//HAL_UART_Receive (&huart1,(uint8_t*) &rx_buffer, 4 ,100);
+		//Radio_Recieve_Raw((uint8_t*) &rx_buffer, 4);
+		//MAV_Send_Debug_Statement();
+		MAV_Parse_Data();
+		HAL_Delay(300);
+
+		/*
 		for(int i=0;i<4;i++)
 		{
 
@@ -128,16 +142,18 @@ int main(void)
 				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 15);
 			}
 		}
-
+		*/
 		//HAL_Delay(100);
 		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pulse_width);
 		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, pulse_width);
 		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, pulse_width);
 		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, pulse_width);
 		//pulse_width +=1;
+		/*
 		if(pulse_width>10){
 			pulse_width = 8;
 		}
+		*/
 
 	}//end while
 
@@ -300,7 +316,7 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.BaudRate = 57600*2;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_EVEN;
+  huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
@@ -309,7 +325,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-  //huart1.Init.BaudRate = huart1.Init.BaudRate*2;//must double due to oversampling
+  //huart1.Init.BaudRate = huart1.Init.BaudRate*2;//must double due to oversampling (dont do here, do above)
   /* USER CODE END USART1_Init 2 */
 
 }

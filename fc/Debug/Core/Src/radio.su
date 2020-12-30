@@ -1,0 +1,4 @@
+radio.c:18:6:Transmit	4	static
+radio.c:23:6:Radio_Transmit_Raw	16	static
+radio.c:26:6:Radio_Recieve_Raw	16	static
+radio.c:29:6:Radio_Transmit_Square	24	static

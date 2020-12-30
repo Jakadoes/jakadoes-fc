@@ -81,21 +81,13 @@ int main(void)
 	    1  // Component ID (a MAV_COMPONENT value)
 	};
 
-
-	//ARM PWM Signals
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-
-	uint16_t pulse_width = 7;
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 	char tx_buffer[4] = "Hl\r\n";
 	char rx_buffer[4] = "test";
 
 	//HAL_Delay(3000);//wait for ESC's to arm
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-	uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
+	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
 
 	while(1){
 		//HAL_UART_Transmit(&huart1,(uint8_t*) &rx_buffer, sizeof(rx_buffer),HAL_MAX_DELAY);
@@ -105,7 +97,7 @@ int main(void)
 		//Radio_Recieve_Raw((uint8_t*) &rx_buffer, 4);
 		//MAV_Send_Debug_Statement();
 		MAV_Parse_Data();
-		HAL_Delay(300);
+		HAL_Delay(100);
 
 		/*
 		for(int i=0;i<4;i++)
@@ -255,9 +247,9 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 1000;
+  htim4.Init.Prescaler = 10;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 160;
+  htim4.Init.Period = 16000;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
@@ -271,7 +263,7 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 7;
+  sConfigOC.Pulse = 700;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)

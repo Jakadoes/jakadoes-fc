@@ -19,7 +19,7 @@ int MAV_MAX_PARSE_AMT = 279; //determines maximum bytes in buffer to parse befor
 //mavlink common variables
 mavlink_status_t status;
 mavlink_message_t msg;
-mavlink_rc_channels_scaled_t rc_channels_scaled;
+mavlink_rc_channels_scaled_t rc_channels_scaled_msg;
 int chan = MAVLINK_COMM_0;
 uint8_t SYSTEM_ID = 2;
 uint8_t COMPONENT_ID = 3;//this can be used later to assign names of components on drone
@@ -48,10 +48,16 @@ void MAV_Parse_Data(){
 			 {
 			 	 case MAVLINK_MSG_ID_RC_CHANNELS_SCALED:
 			 	 {
-			 		 MAV_Send_Debug_Statement("poop", msg.msgid);
-			 		 //decode
-			 		 mavlink_msg_rc_channels_scaled_decode(&msg, &rc_channels_scaled);
-			 		 MAV_Send_Debug_Statement("rc1", rc_channels_scaled.chan1_scaled);
+			 		//decode
+			 		mavlink_msg_rc_channels_scaled_decode(&msg, &rc_channels_scaled_msg);
+			 		//MAV_Send_Debug_Statement("rc1", rc_channels_scaled_msg.chan1_scaled);
+			 		//MAV_Send_Debug_Statement("rc2", rc_channels_scaled_msg.chan2_scaled);
+			 		//MAV_Send_Debug_Statement("rc3", rc_channels_scaled_msg.chan3_scaled);
+
+			 		 //for now, set this to arm motors
+			 		 Motor_Arm();
+			 		 //set motor speed
+			 		 Motor_Set_Speed_All(rc_channels_scaled_msg.chan1_scaled, rc_channels_scaled_msg.chan2_scaled, rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);
 			 		 break;
 			 	 }
 			 }
@@ -63,17 +69,20 @@ void MAV_Parse_Data(){
 
 void MAV_Send_Debug_Statement(char message[], uint32_t value)
 {
+	//create buffer of static proper length (static for this mavlink message)
+	int PACKET_STATIC_SIZE = 30; //used to determine buffer size, and reduce bad 00's being sent
+	char buffer[PACKET_STATIC_SIZE];
+
 	//create struct and fill in data
-	///char test[5] = "abcde";
 	mavlink_named_value_int_t msgStruct;
 	strcpy(msgStruct.name,message);
 	msgStruct.time_boot_ms = 4;
 	msgStruct.value = value;
+	//encode and serialize
 	mavlink_msg_named_value_int_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
-	mavlink_msg_to_send_buffer(&rx_buffer_mav, &msg);
-	//MAV_Correct_STX(&rx_buffer_mav);//used to correct error with wrong STX for some reason
-	Radio_Transmit_Raw(&rx_buffer_mav, sizeof(rx_buffer_mav));
-	//Radio_Transmit_Raw(&test, sizeof(test));
+	mavlink_msg_to_send_buffer(&buffer, &msg);
+	//transmit
+	Radio_Transmit_Raw(&buffer, sizeof(buffer));
 }
 
 void MAV_Send_Debug_Statement_Default()

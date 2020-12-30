@@ -12,6 +12,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors.focus import FocusBehavior
 import enum
+import blinker
 
 class TerminalModes(enum.Enum):
     #modes determine how to terminal will behave in terms of displaying data
@@ -30,17 +31,20 @@ class Terminal(FocusBehavior, GridLayout):
         super(Terminal, self).__init__(**kwargs)
         Clock.schedule_once(self.after_init)#provide ref to app after inits 
 
-    def HandleTerminal(self):
-        if(self.mode == TerminalModes.SERIALMONITOR):
-            if(self.app.root.serialHandler.isConnected):
-                self.LogMessage( str(self.app.root.serialHandler.rx_buffer) )
-            else:
-                self.OverwriteLog("not connected to COM port, please connect to monitor")
-
     def after_init(self, dt): #provide refference to app after initializations
         self.app= App.get_running_app()
         if(self.app == None):
             print('WARNING: refference to app was not made, null pointers may occur')
+        blinker.signal('newData').connect(self.HandleTerminal)
+
+    def HandleTerminal(self, eventhandlerdata):
+        #method to be called during new data event 
+        #eventhandlerdata is only there to stop errors 
+        if(self.mode == TerminalModes.SERIALMONITOR):
+            if(self.app.root.serialHandler.isConnected):
+                self.LogMessage( "Drone: "+str(self.app.root.serialHandler.rx_buffer) )
+            else:
+                self.OverwriteLog("not connected to COM port, please connect to monitor")
 
     def RefocusInput(self, event):
         self.get_focus_next().focus = True
@@ -64,10 +68,11 @@ class Terminal(FocusBehavior, GridLayout):
         self.textLog.text = message
     def on_enter(self, instance):
         #process enter event from input to terminal 
-        print(instance.text)
+        #print(instance.text)
         self.LogMessage(instance.text)
-        print(self.app)
-        self.app.root.serialHandler.sendRawPacket(instance.text)
+        #print(self.app)
+        if(self.mode == TerminalModes.SERIALMONITOR):
+            self.app.root.serialHandler.sendRawPacket(instance.text)
         instance.text = '>'#reset after enter
         Clock.schedule_once(self.RefocusInput) #keep input selected after pressing enter
 

@@ -1,6 +1,7 @@
 #Created by Damien Sabljak
 #only works with python 3.5 to 3.7
 #kivy imports 
+from blinker.base import Signal
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.properties import (
@@ -16,85 +17,83 @@ from kivy.uix.behaviors.focus import FocusBehavior
 #pip or naitive imports
 import serial
 import time 
+import blinker
+import enum
 #user defined imports 
 from terminal import Terminal
 import telemetry as telem
+from gamepad import GamepadHandler
+
+class SignalTypes(enum.Enum):
+    #currently only for refference, may not work in code 
+    newData = blinker.signal("newData")
+    gamepadControlInput = blinker.signal("gamepadControlInput")
 
 
 
 
-class GamepadHandler(object):
+class SerialHandler():
     app = None
-    feedbackPanel = None
-    serialHandler = None
-    time_new = [0,0,0,0,0,0,0]#holds elapsed time slots for each axis
-    time_old = [0,0,0,0,0,0,0] 
+    READTIMEOUT = 3 #sets read timeout in seconds, set 0 to non-block
+    baudRate = 55555
+    isConnected = False #check if com port is connected before giving commands 
+    ser = None
+    rx_buffer = None
+    gamepadHandler = None
+    mavHandler = None
+    useMAV = True
 
     def __init__(self, **kwargs):
-        super(GamepadHandler, self).__init__(**kwargs)
+        super(SerialHandler, self).__init__(**kwargs)
         Clock.schedule_once(self.after_init)#provide ref to app after inits 
-
+    
     def after_init(self, dt): #provide refference to app after initializations
         self.app= App.get_running_app()
         if(self.app == None):
             print('WARNING: refference to app was not made, null pointers may occur')
-        self.feedbackPanel = self.app.root.motorPanel
-        self.serialHandler = self.app.root.serialHandler
+        self.gamepadHandler = self.app.root.gamepadHandler
 
-    #Event function to bind controller events to window
-    def on_joy_axis(self, win, stickid, axisid, value):
-        #declare axisid's of the sticks on Xbox one controller 
-        LEFTSTICK_Y = 1
-        LEFTSTICK_X = 0
-        RIGHTSTICK_Y = 4
-        LEFTTRIGGER = 2
-        RIGHTTRIGGER = 5
-
-        #set max event frequency to 20 miliseconds to reduce uneeded event calls
-        self.time_new[axisid] = time.clock()#measured in seconds 
-        if((self.time_new[axisid] - self.time_old[axisid])< 0.020):
-            return 0
-        self.time_old[axisid] = self.time_new[axisid]
-        
-
-        print(win, stickid, axisid, value)
-        #normalize input to [-100, 100]
-        value_rounded = round((-100*value)/32767, 3)  
-        if( axisid == LEFTTRIGGER or axisid == RIGHTTRIGGER):
-            value_rounded = -1*value_rounded
-
-        #send command to FC through radio
-        self.serialHandler.sendMotorCommand(axisid, value)
-
-        #show grapical feedback
-        if(self.feedbackPanel.instrument1 != None and axisid == LEFTSTICK_Y):
-                self.feedbackPanel.instrument1.reading = value_rounded
-        elif(self.feedbackPanel.instrument1 != None and axisid == LEFTSTICK_X):
-            self.feedbackPanel.instrument1.reading_sub = value_rounded
-        elif(self.feedbackPanel.instrument2 != None and axisid == RIGHTSTICK_Y):
-                self.feedbackPanel.instrument2.reading = value_rounded
-        elif(self.feedbackPanel.instrument3 != None and axisid == LEFTTRIGGER):
-                self.feedbackPanel.instrument3.reading = value_rounded
-        elif(self.feedbackPanel.instrument4 != None and axisid == RIGHTTRIGGER):
-                self.feedbackPanel.instrument4.reading = value_rounded
-        else: 
-            print('WARNING: MOTOR1 NOT DEFINED ')
-
-class SerialHandler():
-    READTIMEOUT = 3 #sets read timeout in seconds, set 0 to non-block
-    isConnected = False
-    ser = None
-    rx_buffer = None
-
-    def ConnectToRadio(self, comNum):
-        self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT)  # open serial port
-        self.ser.baudrate = 57600 
-        print(self.ser.name)         # check which port was really used
+    def ConnectToRadio(self, comNum, useMAV = True):
+        if(useMAV):
+            #Mavlink connection
+            self.mavHandler = telem.MAVHandler()
+            self.mavHandler.Connect('COM' + str(comNum), self.baudRate)
+            self.useMAV = True
+        else:
+            #py serial connection
+            self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT,bytesize=7, parity=serial.PARITY_EVEN)  # open serial port
+            self.ser.baudrate = 57600 
+            print(self.ser.name)         # check which port was really used
+            self.useMAV = False
+        #set connection flag 
         self.isConnected = True
     
-    def RawRead(self):
+    def HandleSerial(self):
+        if(self.isConnected):
+            if(self.useMAV == True):
+                if(True):
+                    #--send RC commands--
+                    self.mavHandler.SendRCData(self.gamepadHandler.rc1,self.gamepadHandler.rc2, self.gamepadHandler.rc3, self.gamepadHandler.rc4)
+
+                    #--receive telemetry data--
+                    msg = self.mavHandler.theConnection.recv_match()
+                    #print(msg)
+                    if not msg:
+                        return
+                    if (msg.get_type() == "NAMED_VALUE_INT"):
+                        print("Named int message recieved: ")
+                        print(msg.name)
+                        print(msg.value) 
+            else:
+                if(self.ser.inWaiting() >= 4):#read in message whenever its larger then designated packet size 
+                    self.RawRead(4)
+                    sig = blinker.signal('newData') #create an event for other pieces of code to listen to
+                    sig.send()
+                    #print("signal shoud be being sent..")
+
+    def RawRead(self, numBytes):
         #returns bytes of serial data 
-        telem_in = telem.RawRead(self.ser)
+        telem_in = telem.RawRead(self.ser, numBytes)
         self.rx_buffer = telem_in
 
     def sendRawPacket(self, message):
@@ -167,9 +166,9 @@ class CommandWidget(GridLayout):
 
     def update(self, dt):
         #print(dt) #dt is time between update() calls (in seconds)
-        if(self.serialHandler.isConnected):
-            self.serialHandler.RawRead()
-        self.terminal.HandleTerminal()
+        self.serialHandler.HandleSerial()
+        #self.terminal.HandleTerminal() #should no longer be called here, event driven 
+    
     
 class CommandAndControlApp(App):
     def build(self):
@@ -178,7 +177,7 @@ class CommandAndControlApp(App):
         #bind events
         Window.bind(on_joy_axis=Command.gamepadHandler.on_joy_axis)
         Command.terminal.textInput.bind(on_text_validate=Command.terminal.on_enter) #bind events to terminal log input 
-        Clock.schedule_interval(Command.update, 1.0 / 1.0) #set update interval (in seconds i think)
+        Clock.schedule_interval(Command.update, 1.0 / 60.0) #set update interval (in seconds i think)
         return Command
 
 

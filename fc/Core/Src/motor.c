@@ -25,17 +25,18 @@ void Motor_Arm()
 
 void Motor_Set_Speed_Single(uint8_t MotorNum, int16_t speed_scaled)
 {
-	//input: (0 to 1000), this gets converted to between 800 and 1600
+	//input: (0 to 1000), this gets converted to between 800 and 1600 (see clock speed calcs)
 	int16_t speed_converted = 8*(speed_scaled/10) + 800;
 	__HAL_TIM_SET_COMPARE(&htim4, timChannels[MotorNum], speed_converted);
 }
 
 void Motor_Set_Speed_All(int16_t speed_scaled1, int16_t speed_scaled2, int16_t speed_scaled3, int16_t speed_scaled4)
 {
-	Motor_Set_Speed_Single(1, speed_scaled1);
-	Motor_Set_Speed_Single(2, speed_scaled2);
-	Motor_Set_Speed_Single(3, speed_scaled3);
-	Motor_Set_Speed_Single(4, speed_scaled4);
+	//CONVENTION from front left clockwise
+	Motor_Set_Speed_Single(0, speed_scaled1);
+	Motor_Set_Speed_Single(3, speed_scaled2);
+	Motor_Set_Speed_Single(1, speed_scaled3);
+	Motor_Set_Speed_Single(2, speed_scaled4);
 }
 
 

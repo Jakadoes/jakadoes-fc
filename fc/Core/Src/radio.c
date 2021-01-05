@@ -8,7 +8,7 @@
 #include "stdint.h"
 #include "stm32f1xx_hal.h"
 UART_HandleTypeDef huart1;
-uint32_t RADIO_RX_TIMEOUT = 500;
+uint32_t RADIO_RX_TIMEOUT = 300;
 
 struct Radio {
 	int baudRate;

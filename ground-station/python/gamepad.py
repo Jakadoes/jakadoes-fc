@@ -25,16 +25,22 @@ class GamepadHandler(object):
     time_new = [0,0,0,0,0,0,0]#holds elapsed time slots for each axis
     time_old = [0,0,0,0,0,0,0] 
     #declare axisid's of the sticks on Xbox one controller 
-    MIN_TIME_BETWEEN_EVENTS = 0.02 #in s
+    MIN_TIME_BETWEEN_EVENTS = 0.005 #in s
     LEFTSTICK_Y = 1
     LEFTSTICK_X = 0
     RIGHTSTICK_Y = 4
     LEFTTRIGGER = 2
     RIGHTTRIGGER = 5
-    PITCH_SENS = 1
-    ROLL_SENS = 1
-    YAW_SENS = 1
-    DYNAMIC_THRUST_RANGE = 0.4
+    #store calibaration data
+    THRUST_LIMIT = 0.50 #percentage of max acheivable thrust 
+    PITCH_SENS = 0.3
+    ROLL_SENS = 0.3
+    YAW_SENS = 0.1
+    DYNAMIC_THRUST_RANGE = 0.25
+    THRUST_CAL = 0
+    PITCH_CAL = -45
+    YAW_CAL = 0
+    ROLL_CAL = -20
     Thrust = 0
     Pitch = 0
     Yaw = 0
@@ -63,7 +69,7 @@ class GamepadHandler(object):
             return 0
         self.time_old[axisid] = self.time_new[axisid]
     
-        print(win, stickid, axisid, value)
+        #print(win, stickid, axisid, value)
         #normalize input to [-100, 100]
         value_rounded = round((-100*value)/32767, 3)  
         if( axisid == self.LEFTTRIGGER or axisid == self.RIGHTTRIGGER):
@@ -79,18 +85,18 @@ class GamepadHandler(object):
         
         #thrust
         if(axisid == self.RIGHTSTICK_Y):
-            self.Thrust = value_rounded
+            self.Thrust = round( (value_rounded + self.THRUST_CAL)*self.THRUST_LIMIT , 3)
         #Roll
         elif(axisid == self.LEFTSTICK_X):
-            self.Roll = value_rounded
+            self.Roll = round(value_rounded + self.ROLL_CAL, 3)
         #pitch
         elif(axisid == self.LEFTSTICK_Y):
-            self.Pitch = value_rounded
+            self.Pitch = round(value_rounded + self.PITCH_CAL, 3)
         #yaw
         elif(axisid == self.LEFTTRIGGER):
-            self.YAW = -1*value_rounded 
+            self.YAW = round(-1*value_rounded + self.YAW_CAL, 3)
         elif(axisid == self.RIGHTTRIGGER):
-            self.YAW = value_rounded 
+            self.YAW = round(value_rounded, 3)
         #print("commands: ")
         #print("thrust:",self.Thrust,"yaw:", self.yaw,"pitch", self.Pitch,"roll", self.Roll)
 
@@ -103,8 +109,8 @@ class GamepadHandler(object):
         rc3 = max( (1-self.DYNAMIC_THRUST_RANGE)*self.Thrust + (self.DYNAMIC_THRUST_RANGE/3)*(self.Pitch*self.PITCH_SENS + self.Roll*self.ROLL_SENS + self.Yaw*self.YAW_SENS) , 0) + self.Thrust/10
         rc4 = max( (1-self.DYNAMIC_THRUST_RANGE)*self.Thrust + (self.DYNAMIC_THRUST_RANGE/3)*(self.Pitch*self.PITCH_SENS - self.Roll*self.ROLL_SENS - self.Yaw*self.YAW_SENS) , 0) + self.Thrust/10
         
-        print("RC Data processed: ")
-        print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
+        #print("RC Data processed: ")
+        #print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
         self.rc1 = rc1
         self.rc2 = rc2
         self.rc3 = rc3
@@ -116,15 +122,16 @@ class GamepadHandler(object):
     def GraphicsFeedback(self, axisid, value_rounded):
         #show grapical feedback on GUI
         if(self.feedbackPanel.instrument1 != None and axisid == self.LEFTSTICK_Y):
-                self.feedbackPanel.instrument1.reading = value_rounded
+                self.feedbackPanel.instrument1.reading = self.Pitch
         elif(self.feedbackPanel.instrument1 != None and axisid == self.LEFTSTICK_X):
-            self.feedbackPanel.instrument1.reading_sub = value_rounded
+            self.feedbackPanel.instrument1.reading_sub = self.Roll
         elif(self.feedbackPanel.instrument2 != None and axisid == self.RIGHTSTICK_Y):
-                self.feedbackPanel.instrument2.reading = value_rounded
+                self.feedbackPanel.instrument2.reading = self.Thrust
         elif(self.feedbackPanel.instrument3 != None and axisid == self.LEFTTRIGGER):
-                self.feedbackPanel.instrument3.reading = value_rounded
+                self.feedbackPanel.instrument3.reading = self.Yaw
         elif(self.feedbackPanel.instrument4 != None and axisid == self.RIGHTTRIGGER):
-                self.feedbackPanel.instrument4.reading = value_rounded
+                self.feedbackPanel.instrument4.reading = self.Yaw
         else: 
-            print('no instrument linked to this input ')
+            #print('no instrument linked to this input ')
+            pass
 

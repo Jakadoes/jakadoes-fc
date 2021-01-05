@@ -20,7 +20,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -76,28 +75,29 @@ int main(void)
 	MX_USART1_UART_Init();
 	MX_TIM4_Init();
 	//MAVlink stuff
-	mavlink_system_t mavlink_system = {
-	    1, // System ID2 (1-255)
-	    1  // Component ID (a MAV_COMPONENT value)
-	};
-
+	//mavlink_system_t mavlink_system = {
+	//    1, // System ID2 (1-255)
+	//    1  // Component ID (a MAV_COMPONENT value)
+	//};
+	//Motor_Arm();
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 	char tx_buffer[4] = "Hl\r\n";
 	char rx_buffer[4] = "test";
-
-	//HAL_Delay(3000);//wait for ESC's to arm
+	uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
+	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
 
 	while(1){
 		//HAL_UART_Transmit(&huart1,(uint8_t*) &rx_buffer, sizeof(rx_buffer),HAL_MAX_DELAY);
 		//HAL_Delay(1);
-		//Radio_Transmit_Raw((uint8_t*) &rx_buffer, 4);
+		//Radio_Transmit_Raw((uint8_t*) &test, 5);
 		//HAL_UART_Receive (&huart1,(uint8_t*) &rx_buffer, 4 ,100);
 		//Radio_Recieve_Raw((uint8_t*) &rx_buffer, 4);
-		//MAV_Send_Debug_Statement();
+		//MAV_Send_Debug_Statement_Default();
+		//Motor_Set_Speed_All(0,0,0,0);
 		MAV_Parse_Data();
-		HAL_Delay(100);
+		//HAL_Delay(10); //DO NOT Delay when real time flight controls are required
 
 		/*
 		for(int i=0;i<4;i++)
@@ -174,7 +174,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -185,10 +185,10 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -263,7 +263,7 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 700;
+  sConfigOC.Pulse = 800;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)

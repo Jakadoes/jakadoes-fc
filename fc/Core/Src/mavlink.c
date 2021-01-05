@@ -28,6 +28,7 @@ uint32_t TIME_BOOT_MS = 0;
 uint8_t test[5] = {0xFE, 0xFE, 0xFE, 0xFE, 0xFE};
 char rx_buffer_mav[279];
 uint8_t byte_arr[279];
+uint8_t motor_armed = 0;
 
 void MAV_Parse_Data(){
 	char test[4] = "yayy";
@@ -55,15 +56,18 @@ void MAV_Parse_Data(){
 			 		//MAV_Send_Debug_Statement("rc3", rc_channels_scaled_msg.chan3_scaled);
 
 			 		 //for now, set this to arm motors
-			 		 Motor_Arm();
-			 		 //set motor speed
-			 		 Motor_Set_Speed_All(rc_channels_scaled_msg.chan1_scaled, rc_channels_scaled_msg.chan2_scaled, rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);
-			 		 break;
+			 		if(motor_armed == 0){
+			 			Motor_Arm();
+			 			motor_armed = 1;
+			 		}
+			 		//set motor speed
+			 		Motor_Set_Speed_All(rc_channels_scaled_msg.chan1_scaled, rc_channels_scaled_msg.chan2_scaled, rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);
+			 		break;
 			 	 }
-			 }
+			 }//end switch
 			 break;
-	     }
-	}
+	     }//end if
+	}//end for
 }
 
 

@@ -162,12 +162,15 @@ class CommandWidget(GridLayout):
     gamepadHandler = GamepadHandler()
 
     def start(self, vel=(4, 0)):
-        pass
+       pass
 
     def update(self, dt):
+        pass
         #print(dt) #dt is time between update() calls (in seconds)
-        self.serialHandler.HandleSerial()
+        #self.serialHandler.HandleSerial() # should be scheduled in start now 
         #self.terminal.HandleTerminal() #should no longer be called here, event driven 
+    def HandleSerial(self, dt):
+        self.serialHandler.HandleSerial()
     
     
 class CommandAndControlApp(App):
@@ -178,6 +181,7 @@ class CommandAndControlApp(App):
         Window.bind(on_joy_axis=Command.gamepadHandler.on_joy_axis)
         Command.terminal.textInput.bind(on_text_validate=Command.terminal.on_enter) #bind events to terminal log input 
         Clock.schedule_interval(Command.update, 1.0 / 60.0) #set update interval (in seconds i think)
+        Clock.schedule_interval(Command.HandleSerial, 1.0/ 80.0)#throttle serial commands to not cause UART backup, baud rate / (8*max MAV packet size)
         return Command
 
 

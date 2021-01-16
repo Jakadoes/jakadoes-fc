@@ -1,0 +1,2 @@
+cam.c:12:9:Cam_Is_Ready	16	static
+cam.c:19:6:Cam_Poll_Alert	16	static

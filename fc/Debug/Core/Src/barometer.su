@@ -1,0 +1,8 @@
+barometer.c:25:9:Baro_Is_Ready	16	static
+barometer.c:32:6:Baro_Read_Prom_Coefficient	24	static
+barometer.c:40:6:Baro_Get_Coefficients	16	static
+barometer.c:53:6:Baro_Request_Temp	24	static
+barometer.c:58:6:Baro_Request_Press	24	static
+barometer.c:63:6:Baro_Get_Temp	16	static
+barometer.c:72:6:Baro_Get_Press	16	static
+barometer.c:83:6:Baro_Calculate_Altitude	104	static

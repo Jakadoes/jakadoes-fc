@@ -1,0 +1,4 @@
+helpers.c:10:6:Helper_Int8arr_To_Int32	16	static
+helpers.c:16:6:Helper_Int16arr_To_Int8arr	32	static
+helpers.c:41:6:Helper_Int32_To_Int8arr	16	static
+helpers.c:57:6:Helper_Int64_To_Int8arr	24	static

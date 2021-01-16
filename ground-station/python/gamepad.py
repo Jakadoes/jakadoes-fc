@@ -71,9 +71,9 @@ class GamepadHandler(object):
     
         #print(win, stickid, axisid, value)
         #normalize input to [-100, 100]
-        value_rounded = round((-100*value)/32767, 3)  
+        value_rounded = round((-100*value)/32767, 2)  
         if( axisid == self.LEFTTRIGGER or axisid == self.RIGHTTRIGGER):
-            value_rounded = round(-1*value_rounded + 100, 3) #its flipped by default
+            value_rounded = round(-1*value_rounded + 100, 2) #its flipped by default
 
         self.ProcessRCData(axisid,value_rounded)
         self.GraphicsFeedback(axisid, value_rounded)
@@ -85,18 +85,18 @@ class GamepadHandler(object):
         
         #thrust
         if(axisid == self.RIGHTSTICK_Y):
-            self.Thrust = round( (value_rounded + self.THRUST_CAL)*self.THRUST_LIMIT , 3)
+            self.Thrust = round( (value_rounded + self.THRUST_CAL)*self.THRUST_LIMIT , 2)
         #Roll
         elif(axisid == self.LEFTSTICK_X):
-            self.Roll = round(value_rounded + self.ROLL_CAL, 3)
+            self.Roll = round(value_rounded + self.ROLL_CAL, 2)
         #pitch
         elif(axisid == self.LEFTSTICK_Y):
-            self.Pitch = round(value_rounded + self.PITCH_CAL, 3)
+            self.Pitch = round(value_rounded + self.PITCH_CAL, 2)
         #yaw
         elif(axisid == self.LEFTTRIGGER):
-            self.YAW = round(-1*value_rounded + self.YAW_CAL, 3)
+            self.YAW = round(-1*value_rounded + self.YAW_CAL, 2)
         elif(axisid == self.RIGHTTRIGGER):
-            self.YAW = round(value_rounded, 3)
+            self.YAW = round(value_rounded, 2)
         #print("commands: ")
         #print("thrust:",self.Thrust,"yaw:", self.yaw,"pitch", self.Pitch,"roll", self.Roll)
 

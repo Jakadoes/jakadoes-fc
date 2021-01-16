@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "barometer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,6 +74,12 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART1_UART_Init();
 	MX_TIM4_Init();
+	MX_I2C2_Init();
+
+	//initialize variables
+	//uint8_t baro_test = 9;
+	//uint8_t baro_ready_status;
+	//uint8_t baro_prom_rx_buffer[2];
 	//MAVlink stuff
 	//mavlink_system_t mavlink_system = {
 	//    1, // System ID2 (1-255)
@@ -82,8 +88,9 @@ int main(void)
 	//Motor_Arm();
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 	char tx_buffer[4] = "Hl\r\n";
-	char rx_buffer[4] = "test";
+	char rx_buffer[4] = "coef";
 	uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
+	uint8_t baro_flag = 5;
 	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
@@ -96,8 +103,71 @@ int main(void)
 		//Radio_Recieve_Raw((uint8_t*) &rx_buffer, 4);
 		//MAV_Send_Debug_Statement_Default();
 		//Motor_Set_Speed_All(0,0,0,0);
-		MAV_Parse_Data();
-		//HAL_Delay(10); //DO NOT Delay when real time flight controls are required
+		//MAV_Parse_Data();
+		//****start of mpu test code****
+		//uint8_t mpu_status = Mpu_Is_Ready();
+		//Radio_Transmit_Raw(&mpu_status, 1);
+		//****start of cam test code****
+		uint8_t cam_status = Cam_Is_Ready();
+		Radio_Transmit_Raw(&cam_status, 1);
+		HAL_Delay(50);
+		uint16_t error = HAL_I2C_GetError (&hi2c2);
+		Radio_Transmit_Raw(&error, 2);
+		Cam_Poll_Alert();
+		HAL_Delay(100);
+
+
+
+		//*******start of barometer code*******
+/*
+		uint8_t mode[4] = {0x44, 0x00, 0x44};
+		if(baro_flag == 0)
+		{
+			mode[1] = 0x00;
+			Baro_Is_Ready();
+			//Radio_Transmit_Raw(&mode, 4);
+			//Radio_Transmit_Raw(&baro_ready_status, 1);
+
+			Baro_Request_Press(BARO_OSR_4096);
+			baro_flag = 1;
+			HAL_Delay(10);//currently, this is needed to get proper values back
+		}
+		else if (baro_flag == 1 && ( Baro_Is_Ready()== HAL_OK ))
+		{
+			mode[1] = 0x11;
+			Baro_Get_Press();
+			//Radio_Transmit_Raw(&baro_temp_rx_buffer, 3);
+			//Radio_Transmit_Raw(&mode, 4);
+			Baro_Request_Temp(BARO_OSR_4096);
+			baro_flag = 2;
+			HAL_Delay(10);
+		}
+		else if (baro_flag == 2 && ( Baro_Is_Ready()== HAL_OK ))
+		{
+			//char newline[2] = {'\n', '\n'};
+			mode[1] = 0x22;
+			Baro_Get_Temp();
+			Baro_Calculate_Altitude();
+			//Radio_Transmit_Raw(&mode, 4);
+			//Radio_Transmit_Raw(&newline, 2);
+			uint8_t pressArr[4];
+			Helper_Int32_To_Int8arr(pressure, &pressArr);
+			Radio_Transmit_Raw(&pressArr, 4);
+			HAL_Delay(100); //DO NOT Delay when real time flight controls are required
+			baro_flag = 0;
+		}
+		else if(baro_flag == 5 && ( Baro_Is_Ready() == HAL_OK))
+		{//startup - get coefficients and send them out
+			mode[1] = 0x55;
+			Baro_Get_Coefficients();
+			//Radio_Transmit_Raw(&mode, 4);
+			//Radio_Transmit_Raw(&rx_buffer, 4);
+			//Radio_Transmit_Raw(&baro_coeffs, 2*6);
+			baro_flag = 0;
+			HAL_Delay(1000);
+		}
+*/
+//*******end of barometer code*******
 
 		/*
 		for(int i=0;i<4;i++)
@@ -107,31 +177,6 @@ int main(void)
 			{
 				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_RESET);
 				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 7);
-			}
-			else if(rx_buffer[i] == '1')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 9);
-			}
-			else if(rx_buffer[i] == '5')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 12);
-			}
-			else if(rx_buffer[i] == '6')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 13);
-			}
-			else if(rx_buffer[i] == '7')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 14);
-			}
-			else if(rx_buffer[i] == '9')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 15);
 			}
 		}
 		*/

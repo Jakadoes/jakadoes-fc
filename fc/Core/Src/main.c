@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "barometer.h"
+#include "cam.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,10 +112,15 @@ int main(void)
 		uint8_t cam_status = Cam_Is_Ready();
 		Radio_Transmit_Raw(&cam_status, 1);
 		HAL_Delay(50);
-		uint16_t error = HAL_I2C_GetError (&hi2c2);
-		Radio_Transmit_Raw(&error, 2);
-		Cam_Poll_Alert();
-		HAL_Delay(100);
+		if(Cam_Is_Ready() == HAL_OK)
+		{
+			Cam_Poll_Alert();
+		}
+		else
+		{
+			Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
+		}
+		//HAL_Delay(100);
 
 
 

@@ -9,7 +9,7 @@
 
 I2C_HandleTypeDef hi2c2;
 #define I2C_TRIALS_DEFAULT 40
-#define I2C_TIMEOUT_DEFAULT 400
+#define I2C_TIMEOUT_DEFAULT 2000
 
 uint8_t I2c_IsDeviceReady(uint8_t Address)
 {

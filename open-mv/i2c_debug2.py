@@ -18,7 +18,6 @@ class I2cHandler():
     data1 = None
     command = None
 
-
     def Init(self):
         #initialize I2C peripheral
         self.i2c = I2C(2)
@@ -30,6 +29,11 @@ class I2cHandler():
         utime.sleep_ms(500)
 
     def HandleI2c(self):
+        #general flow of handling:
+        #1. check for I2C commands
+        #2. if a command is received, determine command
+        #3. for any command, catch receive command shortly after and then
+        #   transmit requested data
         #check for I2C commands
         try:
             print("I2C: receiving commands..")
@@ -73,6 +77,7 @@ class I2cHandler():
         #print (self.data)
 
 #*******#TEST CODE# *****
+# comment out when this files is used as a library
 clock = time.clock()
 
 i2c = I2cHandler()

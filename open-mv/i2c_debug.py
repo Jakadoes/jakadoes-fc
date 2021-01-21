@@ -51,7 +51,7 @@ while(True):
             utime.sleep_ms(10)
             try:
              print("sending...")
-             i2c.send(0x01,0,timeout=5000)
+             i2c.send(0x69,0,timeout=5000)
              print("sent")
             except OSError:
                 print("an OSError has occured")
@@ -64,4 +64,12 @@ while(True):
 
 #print(clock.fps())
 
-
+class I2cHandler():
+    def Init():
+        #initialize I2C peripheral
+        i2c = I2C(2)
+        i2c.init(I2C.SLAVE, addr=0x26, dma= False)
+        #switch = pyb.Switch()
+        data1 = bytearray(4,)
+        command = bytearray(4)
+        clock = time.clock()

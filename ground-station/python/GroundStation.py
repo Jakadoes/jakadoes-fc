@@ -28,20 +28,21 @@ class SignalTypes(enum.Enum):
     #currently only for refference, may not work in code 
     newData = blinker.signal("newData")
     gamepadControlInput = blinker.signal("gamepadControlInput")
-
-
-
-
+    
 class SerialHandler():
     app = None
+    #serial parameters
     READTIMEOUT = 3 #sets read timeout in seconds, set 0 to non-block
     baudRate = 55555
     isConnected = False #check if com port is connected before giving commands 
     ser = None
-    rx_buffer = None
     gamepadHandler = None
     mavHandler = None
     useMAV = True
+
+    #message buffers
+    rx_buffer = None
+    fireAlert = False
 
     def __init__(self, **kwargs):
         super(SerialHandler, self).__init__(**kwargs)
@@ -76,14 +77,7 @@ class SerialHandler():
                     self.mavHandler.SendRCData(self.gamepadHandler.rc1,self.gamepadHandler.rc2, self.gamepadHandler.rc3, self.gamepadHandler.rc4)
 
                     #--receive telemetry data--
-                    msg = self.mavHandler.theConnection.recv_match()
-                    #print(msg)
-                    if not msg:
-                        return
-                    if (msg.get_type() == "NAMED_VALUE_INT"):
-                        print("Named int message recieved: ")
-                        print(msg.name)
-                        print(msg.value) 
+                    self.mavHandler.HandleMessage()
             else:
                 if(self.ser.inWaiting() >= 4):#read in message whenever its larger then designated packet size 
                     self.RawRead(4)

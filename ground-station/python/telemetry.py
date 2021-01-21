@@ -35,6 +35,7 @@ def ReadBattery(ser):
     return 
 
 class MAVHandler():
+    app = None
     #you can either use a MAVLink class for lower level access or
     #mavutil for a higher level api that handles the connection
     mavUtil = mavutil
@@ -44,6 +45,12 @@ class MAVHandler():
         super(MAVHandler, self).__init__(**kwargs)
         self.mavUtil.MAVLINK20 = 1 #enable mavlink v2
         blinker.signal('gamepadControlInput').connect(self.SendRCData)
+        Clock.schedule_once(self.after_init)#provide ref to app after inits 
+
+    def after_init(self, dt): #provide refference to app or other widgets after initializations
+        self.app= App.get_running_app()
+        if(self.app == None):
+            print('WARNING: refference to app was not made, null pointers may occur')
 
     def Connect(self,connectionSettings, baudRate):
         self.theConnection = self.mavUtil.mavlink_connection(connectionSettings, baud=baudRate)
@@ -57,8 +64,25 @@ class MAVHandler():
         rcData3_scaled = int(rcData3*10)
         rcData4_scaled = int(rcData4*10)
 
-        print("rc data sent: ", rcData1_scaled, rcData2_scaled, rcData3_scaled, rcData4_scaled)
+        #print("rc data sent: ", rcData1_scaled, rcData2_scaled, rcData3_scaled, rcData4_scaled)
         self.theConnection.mav.rc_channels_scaled_send(time_boot_ms= 0, port=0,rssi=0, chan1_scaled =  rcData1_scaled, chan2_scaled = rcData2_scaled, chan3_scaled = rcData3_scaled, chan4_scaled = rcData4_scaled, chan5_scaled = 32767, chan6_scaled = 32767, chan7_scaled = 32767, chan8_scaled = 32767)
 
-    #def SendRCDAta(self, rcData1, rcData2, rcData3, rcData4):
+    def HandleMessage(self):
+        #handler for incoming mavlink messages
+        msg = self.theConnection.recv_match()
+        #print(msg)
+        if not msg:
+            return
+        elif (msg.get_type() == "NAMED_VALUE_INT"):
+            self.HandleNamedValueInt()
+        
+    def HandleNamedValueInt(self, msg):
+        print("Named int message recieved: ")
+        print(msg.name)
+        print(msg.value) 
+
+        if(msg.name == "FireAlert"):
+            app.root.serialHandler.fireAlert = True
+            #invoke a HandlerFireAlert here!!
+
         

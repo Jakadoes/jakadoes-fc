@@ -1,5 +1,5 @@
 #:kivy 1.0.9
-
+#DO NOT USE ANY OTHER VERSION OF KIVY AS IT WILL CAUSE ISSUES 
 <PanelHeader>:
     rows:1
     text: 'no text defined'
@@ -16,8 +16,6 @@
         pos: root.pos
         text: root.text
         font_size: self.font_size
-
-
 
 <ButtonPanel>:
     radio_connect_button: radio_connect_button
@@ -129,8 +127,7 @@
             width: 8.0
             cap: 'none'
             circle:
-                (self.center_x+10, self.center_y-30, min(self.width, self.width)
-                / 2 -3, self.gaugeStartAngle,self.gaugeEndAngle)
+                (self.center_x+10, self.center_y-30, min(self.width, self.width)/ 2 -3, self.gaugeStartAngle,self.gaugeEndAngle)
         #sets actual value line of main reading 
         Color:
             rgba: root.gaugeColor
@@ -138,8 +135,8 @@
             width: 8.0
             cap: 'none'
             circle:
-                (self.center_x+10, self.center_y-30, min(self.width, self.width)
-                / 2 -3, (self.gaugeEndAngle - self.gaugeStartAngle)/2 + self.gaugeStartAngle,(self.reading/(self.maxReading-self.minReading)) *(self.gaugeEndAngle-self.gaugeStartAngle) + self.gaugeStartAngle + (self.gaugeEndAngle - self.gaugeStartAngle)/2)
+            #WARNING: FOR SOME REASON, DIVIDING BY A PARAMATER CAUSES ZERO DIVISION 
+            #    (self.center_x+10, self.center_y-30, (min(self.width, self.width)/2.0) -3, self.gaugeStartAngle, (root.gaugeEndAngle - root.gaugeStartAngle)*(root.reading - root.minReading)/(100-0.0)   )
         #sets actual reading line of sub reading 
         Color:
             rgba: root.gaugeColor_sub
@@ -147,14 +144,14 @@
             width: 2.0
             cap: 'none'
             circle:
-                (self.center_x+10, self.center_y-30, min(self.width, self.width)*0.75
-                / 2 -3, (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2 + self.gaugeStartAngle_sub,(self.reading_sub/(self.maxReading_sub-self.minReading_sub)) *(self.gaugeEndAngle_sub-self.gaugeStartAngle_sub) + self.gaugeStartAngle_sub + (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2)
+            #WARNING: FOR SOME REASON, DIVIDING BY A PARAMATER CAUSES ZERO DIVISION, SET LAST TWO VALUES MANUALLY (GAUGE MAX READING_SUB - GAUGE MIN READING_SUB)
+                (self.center_x+10, self.center_y-30, min(self.width, self.width)*0.75 / 2 -3, (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2 + self.gaugeStartAngle_sub,(self.reading_sub/( 100.0-(-100.0) )) *(self.gaugeEndAngle_sub-self.gaugeStartAngle_sub) + self.gaugeStartAngle_sub + (self.gaugeEndAngle_sub - self.gaugeStartAngle_sub)/2)
     #display main reading as a number 
     Label: 
         font_size: 25
         color: 1,1,1,1
         pos: root.center_x-40, root.center_y-80
-        text: str(root.reading)
+        text: str((root.reading))
     Label: 
         font_size: 18
         color: 0.5,0.5,0.5,1

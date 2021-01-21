@@ -70,8 +70,7 @@ void MAV_Parse_Data(){
 	}//end for
 }
 
-
-void MAV_Send_Debug_Statement(char message[], uint32_t value)
+void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value)
 {
 	//create buffer of static proper length (static for this mavlink message)
 	int PACKET_STATIC_SIZE = 30; //used to determine buffer size, and reduce bad 00's being sent
@@ -87,6 +86,11 @@ void MAV_Send_Debug_Statement(char message[], uint32_t value)
 	mavlink_msg_to_send_buffer(&buffer, &msg);
 	//transmit
 	Radio_Transmit_Raw(&buffer, sizeof(buffer));
+}
+
+void MAV_Send_Debug_Statement(char message[], uint32_t value)
+{
+	Mav_Send_Msg_Named_Value_Int(&message, value);
 }
 
 void MAV_Send_Debug_Statement_Default()

@@ -110,16 +110,14 @@ int main(void)
 		//Radio_Transmit_Raw(&mpu_status, 1);
 		//****start of cam test code****
 		uint8_t cam_status = Cam_Is_Ready();
-		Radio_Transmit_Raw(&cam_status, 1);
+		//Radio_Transmit_Raw(&cam_status, 1);
 		HAL_Delay(50);
 		if(Cam_Is_Ready() == HAL_OK)
 		{
 			Cam_Poll_Alert();
 		}
-		else
-		{
-			Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
-		}
+			//Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
+		Cam_Transmit_Alert();
 		//HAL_Delay(100);
 
 

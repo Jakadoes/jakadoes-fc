@@ -21,4 +21,5 @@
 uint8_t cam_alert_rx_buffer[1];
 
 void    Cam_Poll_Alert();
+void    Cam_Transmit_Alert();
 uint8_t Cam_Is_Ready();

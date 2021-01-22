@@ -27,5 +27,6 @@ mavlink_msg_rc_channels_scaled.h:444:20:mavlink_msg_rc_channels_scaled_decode	24
 mavlink_msg_named_value_int.h:55:24:mavlink_msg_named_value_int_pack	56	static
 mavlink_msg_named_value_int.h:117:24:mavlink_msg_named_value_int_encode	40	static
 mavlink.c:33:6:MAV_Parse_Data	16	static
-mavlink.c:74:6:MAV_Send_Debug_Statement	64	dynamic
-mavlink.c:92:6:MAV_Send_Debug_Statement_Default	40	static
+mavlink.c:73:6:MAV_Send_Msg_Named_Value_Int	64	dynamic
+mavlink.c:91:6:MAV_Send_Debug_Statement	16	static
+mavlink.c:96:6:MAV_Send_Debug_Statement_Default	40	static

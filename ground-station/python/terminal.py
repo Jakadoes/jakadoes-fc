@@ -76,8 +76,6 @@ class Terminal(FocusBehavior, GridLayout):
         instance.text = '>'#reset after enter
         Clock.schedule_once(self.RefocusInput) #keep input selected after pressing enter
 
-
-
 class TerminalLog(GridLayout, StencilView): #create as stencil view to mask label widget going out of box 
     pass
 

@@ -2,6 +2,7 @@
 #Various Commands used to interact with the telemetry of the drone
 import serial
 import pymavlink
+from kivy.app import App
 from kivy.clock import Clock
 import blinker
 from pymavlink import mavutil
@@ -35,11 +36,13 @@ def ReadBattery(ser):
     return 
 
 class MAVHandler():
+    #class parameters
     app = None
-    #you can either use a MAVLink class for lower level access or
-    #mavutil for a higher level api that handles the connection
-    mavUtil = mavutil
+    mavUtil = mavutil #you can either use a MAVLink class for lower level access or mavutil for a higher level api that handles the connection
     theConnection = None
+    #message enums
+    ALERT_FIRE_DETECTED = 0x11
+    ALERT_FIRE_NONE = 0x10
     
     def __init__(self, **kwargs):
         super(MAVHandler, self).__init__(**kwargs)
@@ -71,10 +74,11 @@ class MAVHandler():
         #handler for incoming mavlink messages
         msg = self.theConnection.recv_match()
         #print(msg)
+        #create switch for all defined message types 
         if not msg:
             return
         elif (msg.get_type() == "NAMED_VALUE_INT"):
-            self.HandleNamedValueInt()
+            self.HandleNamedValueInt(msg)
         
     def HandleNamedValueInt(self, msg):
         print("Named int message recieved: ")
@@ -82,7 +86,13 @@ class MAVHandler():
         print(msg.value) 
 
         if(msg.name == "FireAlert"):
-            app.root.serialHandler.fireAlert = True
-            #invoke a HandlerFireAlert here!!
+            if(msg.value == self.ALERT_FIRE_DETECTED):
+                self.app.root.serialHandler.fireAlert = True
+                #***invoke a HandleFireAlert method based on this flag***
+            elif(msg.value == self.ALERT_FIRE_NONE):
+                self.app.root.serialHandler.fireAlert = False
+            else:
+                print("warning: FireAlert content was not an expected enum, data may be corrupted")
+            
 
         

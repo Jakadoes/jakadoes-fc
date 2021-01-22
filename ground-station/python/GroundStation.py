@@ -96,7 +96,6 @@ class SerialHandler():
     def sendMotorCommand(self, axisid, value):
         telem.sendPacket(self.ser, (str(axisid) +" "+ str(value)).encode('utf-8'))
     
-
 class MyTextInput(TextInput):
     def on_parent(self, widget, parent):
         self.focus = True

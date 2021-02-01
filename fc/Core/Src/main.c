@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "barometer.h"
 #include "cam.h"
+#include "mavlink.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,6 +91,12 @@ int main(void)
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 	char tx_buffer[4] = "Hl\r\n";
 	char rx_buffer[4] = "coef";
+	//uint8_t payload_test[10] = {1,2,3,4,5,6,7,8,9,10};
+	uint8_t payload_test[10];
+	for (uint8_t i=0; i<10;i++)
+	{
+		payload_test[i] = i+1;
+	}
 	uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
 	uint8_t baro_flag = 5;
 	//HAL_Delay(3000);//wait for ESC's to arm, old
@@ -108,7 +115,21 @@ int main(void)
 		//****start of mpu test code****
 		//uint8_t mpu_status = Mpu_Is_Ready();
 		//Radio_Transmit_Raw(&mpu_status, 1);
+
+		//****start of FTP test code****
+		//cam FTP test
+		cam_photo_rx_buffer[100] = 0x44;
+		cam_photo_rx_buffer[101] = 0x55;
+		cam_photo_rx_buffer[102] = 0x66;
+		Cam_Transmit_Photo(100, 3);
+		//MAV FTP test
+		//MAV_send_File_Transfer_Protocol(&payload_test, 10);
+		//HAL_Delay(500);
+		//Radio_Transmit_Raw(&payload_test, 10);
+		HAL_Delay(1000);
+		//**************end of FTP test code*************
 		//****start of cam test code****
+		/*
 		uint8_t cam_status = Cam_Is_Ready();
 		//Radio_Transmit_Raw(&cam_status, 1);
 		HAL_Delay(50);
@@ -116,10 +137,11 @@ int main(void)
 		{
 			Cam_Poll_Alert();
 		}
-			//Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
+		//Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
 		Cam_Transmit_Alert();
 		//HAL_Delay(100);
-
+		 */
+		//**************end of cam test code*************
 
 
 		//*******start of barometer code*******

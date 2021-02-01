@@ -88,6 +88,28 @@ void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value)
 	Radio_Transmit_Raw(&buffer, sizeof(buffer));
 }
 
+void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
+{   //sends network id, target system, target component, and payload
+    //**NOTE: uses payload within payload, see FTP protocol
+	//define variables not used (add as arguments for increased functionality)
+	uint8_t network_id = 0;//for broadcast
+	uint8_t target_system = 0;//for broadcast
+	uint8_t target_component = 0;//for broadcast
+	//create buffer of proper length
+	int PACKET_STATIC_SIZE = 10 + 3 + payload_len + 2; //mavlink[FTP header + payload]mavlink
+	uint8_t buffer[PACKET_STATIC_SIZE];
+	//create struct and fill in data
+	mavlink_file_transfer_protocol_t msgStruct;
+	strcpy(msgStruct.payload,payload);
+	//encode and serialize
+	mavlink_msg_file_transfer_protocol_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
+	mavlink_msg_to_send_buffer(&buffer, &msg);
+	//transmit
+	Radio_Transmit_Raw(&buffer, sizeof(buffer));
+
+}
+
+
 void MAV_Send_Debug_Statement(char message[], uint32_t value)
 {
 	Mav_Send_Msg_Named_Value_Int(&message, value);

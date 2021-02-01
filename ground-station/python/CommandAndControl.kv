@@ -3,19 +3,26 @@
 <PanelHeader>:
     rows:1
     text: 'no text defined'
-    colour_background: 0,0,0,1
+    colorBackground: 0,0,0,1
+    colorText: 1,1,1,1 
     font_size: 15
     canvas:
-        Color: 
-            rgba: self.colour_background
+        Color: #create border (black box)
+            rgba: 0,0,0,1
         Rectangle:
             size: self.size
             pos: self.pos
+        Color: 
+            rgba: self.colorBackground
+        Rectangle:#create fill - a box over a black box (3 sets border thickness)
+            size: self.width-3, self.height-3
+            pos: root.center_x - (self.width-3)/2 , root.center_y - (self.height-3)/2
     Label:
         size: root.size
         pos: root.pos
         text: root.text
-        font_size: self.font_size
+        font_size: root.font_size
+        color:root.colorText
 
 <ButtonPanel>:
     radio_connect_button: radio_connect_button
@@ -84,25 +91,26 @@
     textLog: terminalLog.textLog
     focus_next: terminalInput.textInput
     rows: 3
-    background_col: 0.1,0.1,0.15,1  
-    text_col: 0.160, 1, 0.870,1
+    colorBackground: 0.1,0.1,0.15,1  
+    colorHeader: 0.1,0.1,0.1,1
+    colorText: 0.160, 1, 0.870,1
     PanelHeader:
         size_hint: 1,0.1
         font_size: 15
-        colour_background: 0.05,0.05,0.075,1 
+        colorBackground: root.colorHeader #0.05,0.05,0.075,1 
         text: 'Serial Terminal'
+        colorText:root.colorText
     TerminalLog:
         id: terminalLog
         size_hint: 1,0.77
-        background_col: self.parent.background_col
-        text_col: self.parent.text_col
+        background_col: self.parent.colorBackground
+        text_col: self.parent.colorText
 
     TerminalInput:
         id: terminalInput
         size_hint: 1,0.13
-        background_col: self.parent.background_col
-        text_col: self.parent.text_col
-
+        background_col: self.parent.colorBackground
+        text_col: self.parent.colorText
 <Instrument>:
     name: 'Instrument x'
     size: 50, 50
@@ -111,13 +119,16 @@
     minReading: -100.0
     gaugeStartAngle: 180.0
     gaugeEndAngle: 360.0
-    gaugeColor: 0, 0.5, 0.4, 1
     reading_sub: 0.00
     maxReading_sub: 100.0
     minReading_sub: -100.0
     gaugeStartAngle_sub: 90.0
     gaugeEndAngle_sub: 270.0
+    colorBackground: 0, 0.5, 0.4, 0.3
+    colorText: 1,1,1,1
+    gaugeColor: 0, 0.5, 0.4, 1
     gaugeColor_sub: 0.878, 0.4, 0, 1
+    
     
     canvas:
         #sets backdrop line of main reading 
@@ -149,16 +160,17 @@
     #display main reading as a number 
     Label: 
         font_size: 25
-        color: 1,1,1,1
+        color: root.colorText
         pos: root.center_x-40, root.center_y-80
         text: str((root.reading))
     Label: 
         font_size: 18
-        color: 0.5,0.5,0.5,1
+        color: root.colorText
         pos: root.center_x-40, root.center_y-100
         text: '('+str(root.reading_sub)+')'
     Label:
         font_size: 12
+        color: root.colorText
         center_x: root.center_x
         center_y: root.top-25
         text: self.parent.name
@@ -166,41 +178,60 @@
 <InstrumentPanel>:
     instrument1: inst_1
     inst_1_gaugeColor: 0, 0.5, 0.4, 1
+    colorBackground: 0.05,0.05,0.075,1 
+    colorHeader: 0.1,0.1,0.1,1
+    colorText: 1,1,1,1
     instrument2: inst_2
     instrument3: inst_3
     instrument4: inst_4
 
     name: 'panelName'
-    backgroundColour: 0.1,0.1,0.15,1  
+    #backgroundColour: 0.1,0.1,0.15,1  
     rows:2
     canvas:
         Color:
-            rgba: self.backgroundColour  #set background of widget grey 
+            rgba: self.colorBackground  #set background of widget grey 
         Rectangle:
             size: root.size
             pos: self.pos
     PanelHeader:
         size_hint: 1,0.1            
         text: self.parent.name
-        colour_background: 0.05,0.05,0.075,1 
+        colorText:root.colorText
+        colorBackground: root.colorHeader
     GridLayout:
         cols: 10
         Instrument:
             id: inst_1
             name: 'Instrument 1'
             gaugeColor: root.inst_1_gaugeColor
+            colorText: root.colorText
+            colorBackground: root.colorBackground
         Instrument:
             id: inst_2
             name: 'Instrument 2'
+            gaugeColor: root.inst_1_gaugeColor
+            colorText: root.colorText
         Instrument: 
             id: inst_3
             name: 'Instrument 3'
+            gaugeColor: root.inst_1_gaugeColor
+            colorText: root.colorText
         Instrument: 
             id: inst_4
             name: 'Instrument 4'
+            gaugeColor: root.inst_1_gaugeColor
+            colorText: root.colorText
 
 <CommandWidget>:
     #panel1: layout_a.instrumentPanel
+    #cream RGB: 1,1,0.8,1
+    #navy blue theme backgound: 0.1,0.1,0.15,1
+    #navy theme text: 0.160, 1, 0.870,1
+    colorHeader: 0.9,0.9,0.9,1
+    colorBackground: 1,1,1,1
+    colorPrimary: 0.67,0.85,0.21,1
+    colorSecondary: 0.1,0.9,0.1,1
     motorPanel: motorPanel
     terminal: terminal
     rows: 2
@@ -208,12 +239,14 @@
         #Rectangle:
             #pos_hint: 1,0.10
             #size: self.width, 10
-    Label: #ToDo: wrap this in custom widget to add line at bottom 
+    PanelHeader: #ToDo: wrap this in custom widget to add line at bottom 
         size_hint: 1,0.10 #only size_hint works with layout i think
         font_size: 50
         center_x: root.width * 2. / 4
         top: root.top - 25
-        text: 'Command Widget'
+        text: 'Eco-Scope'
+        colorText: root.colorPrimary
+        colorBackground: root.colorHeader
 
         #instrumentPanel: instrumentPanel#pass this up the latter for python code 
     GridLayout:
@@ -223,16 +256,26 @@
             rows:2
             InstrumentPanel:
                 name: 'Instrument Panel'
+                inst_1_gaugeColor:root.colorPrimary
+                colorHeader: root.colorHeader
+                colorText: root.colorPrimary
+                colorBackground:root.colorBackground
             GridLayout:
                 cols: 2
                 InstrumentPanel:
                     id: motorPanel
                     size_hint: 0.6,1
                     name: 'Motor Feedback'
+                    colorHeader: root.colorHeader
+                    colorText: root.colorPrimary
+                    colorBackground:root.colorBackground
                     #inst_1_gaugeColor: 163, 142, 3,1
                 Terminal:
                     id: terminal
                     size_hint: 0.4,1
+                    colorHeader: root.colorHeader
+                    colorText: root.colorPrimary
+                    colorBackground:root.colorBackground
         GridLayout:
             rows: 2
             size_hint: 0.35,1

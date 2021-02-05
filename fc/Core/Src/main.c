@@ -99,6 +99,9 @@ int main(void)
 	}
 	uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
 	uint8_t baro_flag = 5;
+	cam_photo_rx_buffer[10] = 0x44;
+	cam_photo_rx_buffer[11] = 0x55;
+	cam_photo_rx_buffer[12] = 0x66;
 	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
@@ -118,29 +121,32 @@ int main(void)
 
 		//****start of FTP test code****
 		//cam FTP test
-		cam_photo_rx_buffer[100] = 0x44;
-		cam_photo_rx_buffer[101] = 0x55;
-		cam_photo_rx_buffer[102] = 0x66;
-		Cam_Transmit_Photo(100, 3);
+		//cam_photo_rx_buffer[100] = 0x44;
+		//cam_photo_rx_buffer[101] = 0x55;
+		//cam_photo_rx_buffer[102] = 0x66;
+		//Cam_Transmit_Photo(100, 3);
 		//MAV FTP test
 		//MAV_send_File_Transfer_Protocol(&payload_test, 10);
 		//HAL_Delay(500);
 		//Radio_Transmit_Raw(&payload_test, 10);
-		HAL_Delay(1000);
+		//HAL_Delay(1000);
 		//**************end of FTP test code*************
 		//****start of cam test code****
-		/*
+		//*
+
 		uint8_t cam_status = Cam_Is_Ready();
-		//Radio_Transmit_Raw(&cam_status, 1);
+		Radio_Transmit_Raw(&cam_status, 1);
 		HAL_Delay(50);
 		if(Cam_Is_Ready() == HAL_OK)
 		{
-			Cam_Poll_Alert();
+			//Cam_Poll_Alert();
+			Cam_Poll_Image(10, 5);
 		}
 		//Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
-		Cam_Transmit_Alert();
-		//HAL_Delay(100);
-		 */
+		Cam_Transmit_Photo_Debug(10, 5);
+		//Cam_Transmit_Alert();
+		HAL_Delay(100);
+		 /*/
 		//**************end of cam test code*************
 
 
@@ -376,7 +382,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 57600*2;
+  huart1.Init.BaudRate = 2*57600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -403,11 +409,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PB3 */
   GPIO_InitStruct.Pin = GPIO_PIN_3;

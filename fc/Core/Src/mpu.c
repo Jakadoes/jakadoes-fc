@@ -9,6 +9,8 @@
 #include "i2c.h"
 
 uint8_t mpu_rx_buffer[1];
+uint8_t mpu_gyro_buffer[2];
+uint8_t mpu_acc_buffer[2];
 
 uint8_t Mpu_Is_Ready()
 {
@@ -23,9 +25,17 @@ void Mpu_Wake()
 	Mpu_Write(MPU_REG_PWR_MGMT_1, config);
 }
 
-void Mpu_Get_Gyro_Data()
+void Mpu_Get_Gyro_Data(uint8_t gyro_axis)
 {
-
+	uint8_t command = MPU_REG_GYRO_X -2 + gyro_axis;
+	Mpu_Read(command);
+	I2c_Master_Recieve(MPU_I2C_ADDRESS, &mpu_gyro_buffer, 2);//data is high byte first
+}
+void Mpu_Get_Acc_Data(uint8_t acc_axis)
+{
+	uint8_t command = MPU_REG_ACC_X -2 + acc_axis;
+	Mpu_Read(command);
+	I2c_Master_Recieve(MPU_I2C_ADDRESS, &mpu_acc_buffer, 2);//data is high byte first
 }
 
 void Mpu_Write(uint8_t regNum, uint8_t writeValue)

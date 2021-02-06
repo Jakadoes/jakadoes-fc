@@ -26,6 +26,19 @@ uint8_t Cam_Is_Ready()
 	return cam_ready_status;
 }
 
+void Cam_Set_I2C(uint8_t state)
+{//uses GPIO pin to indicate to camera either to listen to I2C or resume its duties
+	if(state == 1)
+	{
+		HAL_GPIO_WritePin (GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+		HAL_GPIO_WritePin (GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);//green LED on
+	}
+	else if (state == 0)
+	{
+		HAL_GPIO_WritePin (GPIOB, 3, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin (GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+	}
+}
 void Cam_Poll_Alert()
 {
 	uint8_t test = 0x22;

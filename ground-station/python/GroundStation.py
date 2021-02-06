@@ -23,6 +23,7 @@ import enum
 from terminal import Terminal
 import telemetry as telem
 from gamepad import GamepadHandler
+from camerafeed import CameraFeed
 
 class SignalTypes(enum.Enum):
     #currently only for refference, may not work in code 
@@ -123,9 +124,7 @@ class ButtonPanel(GridLayout):
         print("connect to radio button panel method called..")
         self.app.root.serialHandler.ConnectToRadio(int(self.radio_port_input.text))
 
-class CameraFeed(GridLayout):
-    def getFeedBack(self):
-        pass
+
 
 class Instrument(Widget):
     reading = NumericProperty(0)

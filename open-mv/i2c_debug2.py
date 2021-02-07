@@ -51,16 +51,7 @@ class I2cHandler():
 
             self.CatchRecieveCommand()
             if(True):
-                utime.sleep_ms(10)#need to test delay necessity
-                try:
-                    print("I2C: sending...")
-                    self.i2c.send(0x69,0,timeout=5000)
-                    print("I2C: sent")
-                except OSError:
-                    print("I2C: an OSError has occured")
-                    self.i2c.deinit()
-                    utime.sleep_ms(100)
-                    self.i2c.init(I2C.SLAVE, addr=self.address, dma=self.dma)
+                self.Transmit(0x69)
         self.command[0] = 0
         utime.sleep_ms(10)
 
@@ -75,6 +66,17 @@ class I2cHandler():
             print("I2C: stage 2 no recieve")
             self.data = None
         #print (self.data)
+    def Transmit(self, message):
+        utime.sleep_ms(10)#need to test delay necessity
+        try:
+            print("I2C: sending...")
+            self.i2c.send(message,0,timeout=5000)
+            print("I2C: sent")
+        except OSError:
+            print("I2C: an OSError has occured")
+            self.i2c.deinit()
+            utime.sleep_ms(100)
+            self.i2c.init(I2C.SLAVE, addr=self.address, dma=self.dma)
 
 #*******#TEST CODE# *****
 # comment out when this files is used as a library

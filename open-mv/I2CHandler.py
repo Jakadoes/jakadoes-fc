@@ -22,6 +22,7 @@ class I2cHandler():
     def Init(self):
         #initialize I2C peripheral
         self.i2c = I2C(2)
+        self.i2c.deinit()
         self.i2c.init(I2C.SLAVE, addr=self.address, dma= self.dma)
         #switch = pyb.Switch()
         self.data1 = bytearray(6,)
@@ -29,7 +30,7 @@ class I2cHandler():
 
         utime.sleep_ms(500)
 
-    def HandleI2c(self):
+    def HandleI2c(self, fireData):
         #***general flow of handling***:
         #1. check for I2C commands
         #2. if a command is received, determine command
@@ -73,6 +74,7 @@ class I2cHandler():
                 for i in range(numBytes):
                     img_buffer[i] = i+1 #sudo photo data
                 print(img_buffer)
+                #
                 self.Transmit(img_buffer)#must transmit as fast as possible
                 #self.Transmit(img_buffer)
             #self.command[0] = self.data1[0] #store in buffer for later procesing
@@ -117,7 +119,7 @@ i2c.Init()
 
 while(True):
     clock.tick()
-    i2c.HandleI2c()
+    i2c.HandleI2c(None)
 
 
 

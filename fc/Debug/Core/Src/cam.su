@@ -1,8 +1,8 @@
-cam.c:22:9:Cam_Is_Ready	16	static
-cam.c:29:6:Cam_Set_I2C	16	static
-cam.c:42:6:Cam_Poll_Alert	16	static
-cam.c:68:6:Cam_Poll_Image	48	dynamic
-cam.c:98:6:Cam_Transmit_Alert	8	static
-cam.c:103:6:Cam_Transmit_Photo	32	dynamic
-cam.c:110:6:Cam_Transmit_Photo_Debug	32	dynamic
-cam.c:117:6:Cam_Handle	8	static
+cam.c:25:9:Cam_Is_Ready	16	static
+cam.c:32:6:Cam_Set_I2C	16	static
+cam.c:45:6:Cam_Poll_Alert	16	static
+cam.c:71:6:Cam_Poll_Image	48	dynamic
+cam.c:101:6:Cam_Transmit_Alert	8	static
+cam.c:106:6:Cam_Transmit_Photo	32	dynamic
+cam.c:116:6:Cam_Transmit_Photo_Debug	32	dynamic
+cam.c:124:6:Cam_Handle	8	static

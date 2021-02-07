@@ -41,7 +41,9 @@ class MAVHandler():
     mavUtil = mavutil #you can either use a MAVLink class for lower level access or mavutil for a higher level api that handles the connection
     theConnection = None
     #message enums
-    ALERT_FIRE_DETECTED = 0x11
+    ALERT_FIRE_SCANNING = 0x11
+    ALERT_FIRE_ALERT    = 0x22
+    ALERT_FIRE_STORED   = 0x33
     ALERT_FIRE_NONE = 0x10
     
     def __init__(self, **kwargs):
@@ -79,6 +81,8 @@ class MAVHandler():
             return
         elif (msg.get_type() == "NAMED_VALUE_INT"):
             self.HandleNamedValueInt(msg)
+        elif (msg.get_type() == "FILE_TRANSFER_PROTOCOL"):
+            self.HandleFileTransferProtocol(msg)
         
     def HandleNamedValueInt(self, msg):
         print("Named int message recieved: ")
@@ -86,13 +90,17 @@ class MAVHandler():
         print(msg.value) 
 
         if(msg.name == "FireAlert"):
-            if(msg.value == self.ALERT_FIRE_DETECTED):
+            if(msg.value == self.ALERT_FIRE_SCANNING):
+                self.app.root.serialHandler.fireAlert = False
+            elif(msg.value == self.ALERT_FIRE_ALERT or msg.value == self.ALERT_FIRE_STORED):
                 self.app.root.serialHandler.fireAlert = True
                 #***invoke a HandleFireAlert method based on this flag***
-            elif(msg.value == self.ALERT_FIRE_NONE):
-                self.app.root.serialHandler.fireAlert = False
+            
             else:
                 print("warning: FireAlert content was not an expected enum, data may be corrupted")
+    def HandleFileTransferProtocol(self, msg):
+        print("FTP message received")
+        print(msg.payload)
             
 
         

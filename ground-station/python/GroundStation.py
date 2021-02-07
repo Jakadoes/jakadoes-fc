@@ -63,7 +63,7 @@ class SerialHandler():
             self.useMAV = True
         else:
             #py serial connection
-            self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT,bytesize=7, parity=serial.PARITY_EVEN)  # open serial port
+            self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT,bytesize=8, parity=serial.PARITY_NONE)  # open serial port
             self.ser.baudrate = 57600 
             print(self.ser.name)         # check which port was really used
             self.useMAV = False

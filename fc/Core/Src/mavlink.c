@@ -91,19 +91,41 @@ void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value)
 void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 {   //sends network id, target system, target component, and payload
     //**NOTE: uses payload within payload, see FTP protocol
+
 	//define variables not used (add as arguments for increased functionality)
 	uint8_t network_id = 0;//for broadcast
 	uint8_t target_system = 0;//for broadcast
 	uint8_t target_component = 0;//for broadcast
+	uint8_t payload_new[251];//copy payload to new array for fixed size of 251
+	payload_new[0] = payload_len; //encode first byte as amount of space used in payload
+	for (uint8_t i=1;i<251;i++)
+	{	if(i <payload_len+1)
+		{
+			payload_new[i] = payload[i-1];
+		}
+		else
+		{
+			payload_new[i] = 0xFF;//fill dead space
+		}
+	}
+	//strcpy(payload_new,payload);
+
 	//create buffer of proper length
-	int PACKET_STATIC_SIZE = 10 + 3 + payload_len + 2; //mavlink[FTP header + payload]mavlink
+	//int PACKET_STATIC_SIZE = 10 + 3 + payload_len + 2; //mavlink[FTP header + payload]mavlink
+	int PACKET_STATIC_SIZE = 10 + 3 + 251 + 2; //mavlink[FTP header + payload]mavlink
 	uint8_t buffer[PACKET_STATIC_SIZE];
+
 	//create struct and fill in data
 	mavlink_file_transfer_protocol_t msgStruct;
-	strcpy(msgStruct.payload,payload);
+	msgStruct.target_network = network_id;
+	msgStruct.target_system = target_system;
+	msgStruct.target_component = target_component;
+	strcpy(msgStruct.payload,payload_new);
+
 	//encode and serialize
 	mavlink_msg_file_transfer_protocol_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
 	mavlink_msg_to_send_buffer(&buffer, &msg);
+
 	//transmit
 	Radio_Transmit_Raw(&buffer, sizeof(buffer));
 
@@ -112,22 +134,13 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 
 void MAV_Send_Debug_Statement(char message[], uint32_t value)
 {
-	Mav_Send_Msg_Named_Value_Int(&message, value);
+	MAV_Send_Msg_Named_Value_Int(&message, value);
 }
 
 void MAV_Send_Debug_Statement_Default()
 {
 	char name[10] = "abcdefghij;";
-	//create struct and fill in data
-	mavlink_named_value_int_t msgStruct;
-	strcpy(&msgStruct.name,&name);
-	msgStruct.time_boot_ms = 4;
-	msgStruct.value = 7;
-	mavlink_msg_named_value_int_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
-	mavlink_msg_to_send_buffer(&rx_buffer_mav, &msg);
-	//MAV_Correct_STX(&rx_buffer_mav);//used to correct error with wrong STX for some reason
-	Radio_Transmit_Raw(&rx_buffer_mav, sizeof(rx_buffer_mav));
-	//Radio_Transmit_Raw(&test, sizeof(test));
+	MAV_Send_Msg_Named_Value_Int(&name, 7);
 }
 
 /* OLD stuff

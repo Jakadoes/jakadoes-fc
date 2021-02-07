@@ -90,17 +90,17 @@ int main(void)
 	//Motor_Arm();
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 
-	//uint8_t payload_test[10] = {1,2,3,4,5,6,7,8,9,10};
+	uint8_t payload_test[10] = {1,2,3,4,5,6,7,8,9,10};
 	//uint8_t payload_test[10];
-	//for (uint8_t i=0; i<10;i++)
-	//{
-	//	payload_test[i] = i+1;
-	//}
+	for (uint8_t i=0; i<10;i++)
+	{
+		payload_test[i] = i+1;
+	}
 	//uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
 	//uint8_t baro_flag = 5;
-	//cam_photo_rx_buffer[10] = 0x44;
-	//cam_photo_rx_buffer[11] = 0x55;
-	//cam_photo_rx_buffer[12] = 0x66;
+	cam_photo_rx_buffer[10] = 0x44;
+	cam_photo_rx_buffer[11] = 0x55;
+	cam_photo_rx_buffer[12] = 0x66;
 	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
@@ -132,9 +132,22 @@ int main(void)
 		//**************end of FTP test code*************
 
 		//****start of cam test code****
-		//*
-		Cam_Set_I2C(1);
+		/*
+		//--code part 1--
+
+		Cam_Transmit_Photo(10, 3);
+		//HAL_Delay(1000);
+		//uint8_t test4 = 0xFD;
+		//Radio_Transmit_Raw(&test4, 1);
+		MAV_Send_Debug_Statement_Default();
+		HAL_Delay(1000);
+		*/
+		//MAV_Send_Debug_Statement_Default();
+		//--code part 2--
+		/*
+		//Cam_Set_I2C(1);
 		HAL_Delay(200);
+		Cam_Transmit_Alert();
 		uint8_t cam_status = Cam_Is_Ready();
 		Radio_Transmit_Raw(&cam_status, 1);
 		HAL_Delay(50);
@@ -147,9 +160,14 @@ int main(void)
 		Cam_Transmit_Photo_Debug(10, 5);
 		//Cam_Transmit_Alert();
 		HAL_Delay(1000);
-		Cam_Set_I2C(0);
+		//Cam_Set_I2C(0);
 		HAL_Delay(1000);
-		 /*/
+		*/
+		//-- code part 3 --
+		///*
+		Cam_Handle();
+		HAL_Delay(100);
+		//*/
 		//**************end of cam test code*************
 
 

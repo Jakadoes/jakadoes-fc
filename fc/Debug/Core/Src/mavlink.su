@@ -30,6 +30,6 @@ mavlink_msg_named_value_int.h:55:24:mavlink_msg_named_value_int_pack	56	static
 mavlink_msg_named_value_int.h:117:24:mavlink_msg_named_value_int_encode	40	static
 mavlink.c:33:6:MAV_Parse_Data	16	static
 mavlink.c:73:6:MAV_Send_Msg_Named_Value_Int	64	dynamic
-mavlink.c:91:6:MAV_send_File_Transfer_Protocol	304	dynamic
-mavlink.c:113:6:MAV_Send_Debug_Statement	16	static
-mavlink.c:118:6:MAV_Send_Debug_Statement_Default	40	static
+mavlink.c:91:6:MAV_send_File_Transfer_Protocol	560	dynamic
+mavlink.c:135:6:MAV_Send_Debug_Statement	16	static
+mavlink.c:140:6:MAV_Send_Debug_Statement_Default	24	static

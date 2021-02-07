@@ -8,16 +8,19 @@
 #include "cam.h"
 I2C_HandleTypeDef hi2c2;
 #include"stm32f1xx_hal.h"
-#define HANDLE_MODE_POLLING     0
-#define HANDLE_MODE_ALERT       1
-#define HANDLE_MODE_PHOTOSEND   2
+#define CAM_MODE_POLLING       0x11
+#define CAM_MODE_ALERT         0x22
+#define CAM_MODE_STORED        0x33
+#define CAM_GS_IMG_DELETE      0x11
+#define CAM_GS_IMG_DOWNLOAD    0x11
 
 uint8_t  cam_alert_rx_buffer[1];
-uint8_t  cam_photo_rx_buffer[4000];
-uint8_t  handle_mode = 0;
-uint32_t handle_photo_index = 0;
-uint8_t  handle_photo_length = 10;
-uint8_t  handle_photo_stop = 3000;
+uint8_t  cam_photo_rx_buffer[4000] = {0};
+uint8_t  handle_mode = CAM_MODE_POLLING;
+uint8_t  handle_gs_request  = CAM_GS_IMG_DOWNLOAD;
+uint32_t handle_photo_index = 0;//defines current position in photo transfer
+uint8_t  handle_photo_size  = 10;//defines length of each FTP packet data
+uint8_t  handle_photo_stop  = 3072;//defines length of image array to be sent
 
 uint8_t Cam_Is_Ready()
 {
@@ -35,7 +38,7 @@ void Cam_Set_I2C(uint8_t state)
 	}
 	else if (state == 0)
 	{
-		HAL_GPIO_WritePin (GPIOB, 3, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin (GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin (GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 	}
 }
@@ -45,20 +48,20 @@ void Cam_Poll_Alert()
 	//send single read command
 	//receive 8 bits of data
 	uint8_t command = CAM_COM_POLL_ALERT;
-	test = 0x22;
-	Radio_Transmit_Raw(&test, 1);
+	//test = 0x22;
+	//Radio_Transmit_Raw(&test, 1);
 	I2c_Master_Transmit(CAM_I2C_ADDRESS, &command, 1);
 	//HAL_Delay(1000);
-	uint8_t cam_status = Cam_Is_Ready();
+	//uint8_t cam_status = Cam_Is_Ready();
 
 	//Radio_Transmit_Raw(&cam_status, 1);
 	//if(Cam_Is_Ready() == HAL_OK)//line needs to be not busy for error not to occur
 	//{
-		 test = 0x33;
+		 //test = 0x33;
 		 //HAL_Delay(600);
-		 Radio_Transmit_Raw(&test, 1);
+		 //Radio_Transmit_Raw(&test, 1);
 		 I2c_Master_Receive(CAM_I2C_ADDRESS, cam_alert_rx_buffer, 1);
-		 Radio_Transmit_Raw(&test, 1);
+		 //Radio_Transmit_Raw(&test, 1);
 		 //Radio_Transmit_Raw(&cam_alert_rx_buffer, 1);
 		 //transmission is getting stuck on, causing the cam to stay in receiving mode
 		 //very important to send and expect to recieve the same amount of bytes, otherwise EIO and busy lock down errors
@@ -103,10 +106,13 @@ void Cam_Transmit_Alert()
 void Cam_Transmit_Photo(uint32_t startIndex, uint8_t numBytes)
 {
 	uint8_t photo_data[numBytes];
-	strncpy(&photo_data, &cam_photo_rx_buffer[startIndex], numBytes);
-	//Radio_Transmit_Raw(&photo_data, numBytes);
-	MAV_send_File_Transfer_Protocol(&photo_data, numBytes);
+	photo_data[0] = startIndex;//encode in first byte index
+	strncpy(&photo_data[1], &cam_photo_rx_buffer[startIndex], numBytes);
+	Radio_Transmit_Raw(&photo_data, numBytes);
+	HAL_Delay(500);
+	MAV_send_File_Transfer_Protocol(&photo_data, numBytes+1);
 }
+
 void Cam_Transmit_Photo_Debug(uint32_t startIndex, uint8_t numBytes)
 {//transmits specified photodata as raw serial data (no mavlink)
 	uint8_t photo_data[numBytes];
@@ -114,34 +120,67 @@ void Cam_Transmit_Photo_Debug(uint32_t startIndex, uint8_t numBytes)
 	//Radio_Transmit_Raw(&photo_data, numBytes);
 	Radio_Transmit_Raw(&photo_data, numBytes);
 }
+
 void Cam_Handle()
 {
-	if(handle_mode == HANDLE_MODE_POLLING)//wait for fire detect
+	//MAV_Send_Debug_Statement_Default();
+	if(handle_mode == CAM_MODE_POLLING)//wait for fire detect
 	{
-		Cam_Poll_alert();
-		if(cam_alert_rx_buffer[0] == CAM_ALERT_FIRE_DETECT)
+		Cam_Set_I2C(1);
+		HAL_Delay(500);
+		if (Cam_Is_Ready() == HAL_OK)
 		{
-			Cam_Transmit_Alert();//send alert
-			handle_mode = HANDLE_MODE_ALERT;
+			Cam_Poll_Alert();
+			Cam_Transmit_Alert();
+			if(cam_alert_rx_buffer[0] ==  CAM_MODE_ALERT || cam_alert_rx_buffer[0] ==  CAM_MODE_STORED )
+			{
+				Cam_Transmit_Alert();//send alert
+				handle_mode = CAM_MODE_ALERT;
+			}
+			else
+			{
+				Cam_Set_I2C(0);
+				HAL_Delay(5000);
+			}
 		}
 	}
-	else if(handle_mode == HANDLE_MODE_ALERT)//wait for photo request
+	else if(handle_mode == CAM_MODE_ALERT)//wait for photo request and image to be stored
 	{
-		if(1)//later wait for mavlink request to send photo
+		Cam_Set_I2C(1);
+		HAL_Delay(500);
+		if (Cam_Is_Ready() == HAL_OK)
 		{
-			handle_mode == HANDLE_MODE_PHOTOSEND;
+			Cam_Poll_Alert();
+			Cam_Transmit_Alert();
 		}
-	}
-	else if(handle_mode == HANDLE_MODE_PHOTOSEND)
-	{
-		if(handle_photo_index < handle_photo_stop)
+
+		if(handle_gs_request == CAM_GS_IMG_DOWNLOAD && cam_alert_rx_buffer[0] ==  CAM_MODE_STORED)//mavlink request + stored image needed
 		{
-			Cam_Transmit_Photo(handle_photo_index,handle_photo_length);//send photo data
-			handle_photo_index += handle_photo_length;
+			handle_mode = CAM_MODE_STORED;
 		}
 		else
 		{
-			handle_mode = HANDLE_MODE_POLLING;
+			Cam_Set_I2C(0);
+			HAL_Delay(5000);
 		}
 	}
+	else if(handle_mode == CAM_MODE_STORED)
+	{
+		Cam_Set_I2C(1);
+		HAL_Delay(100);
+		if(handle_photo_index < handle_photo_stop)
+		{
+			if (Cam_Is_Ready() == HAL_OK)
+			{
+				Cam_Poll_Image(handle_photo_index, handle_photo_size);
+				Cam_Transmit_Photo(handle_photo_index,handle_photo_size);//send photo data
+				handle_photo_index += handle_photo_size;
+			}
+		}
+		else
+		{
+			handle_mode = CAM_MODE_POLLING;
+		}
+	}
+	Cam_Set_I2C(0);
 }

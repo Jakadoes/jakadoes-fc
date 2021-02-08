@@ -95,12 +95,18 @@ class MAVHandler():
             elif(msg.value == self.ALERT_FIRE_ALERT or msg.value == self.ALERT_FIRE_STORED):
                 self.app.root.serialHandler.fireAlert = True
                 #***invoke a HandleFireAlert method based on this flag***
-            
             else:
                 print("warning: FireAlert content was not an expected enum, data may be corrupted")
+        elif(msg.name == "CAM_DONE"):
+            self.app.root.cameraFeed.SaveData(4)#save data to file space 1 
     def HandleFileTransferProtocol(self, msg):
         print("FTP message received")
         print(msg.payload)
-            
+        #decode payload:
+        #first byte is number of bytes used in transmission
+        #next 3 bytes are for index with payload[1] being LSB
+        #remaining bytes are photo data 
+        index = msg.payload[1] + msg.payload[2]*(2**8) + msg.payload[3]*(2**8)#decode index 
+        self.app.root.cameraFeed.LogData(index, msg.payload[4:msg.payload[0]+1])
 
         

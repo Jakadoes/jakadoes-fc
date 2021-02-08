@@ -25,7 +25,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/barometer.h ../Core/Inc/cam.h ../Core/Inc/i2c.h \
- ../Core/Inc/mavlink.h \
+ ../Core/Inc/radio.h ../Core/Inc/mavlink.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\mavlink.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\version.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\standard.h \
@@ -253,7 +253,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_heartbeat.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h \
- ../Core/Inc/radio.h ../Core/Inc/mavlink.h
+ ../Core/Inc/mavlink.h
 
 ../Core/Inc/main.h:
 
@@ -312,6 +312,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/cam.h:
 
 ../Core/Inc/i2c.h:
+
+../Core/Inc/radio.h:
 
 ../Core/Inc/mavlink.h:
 
@@ -768,7 +770,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h:
 
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h:
-
-../Core/Inc/radio.h:
 
 ../Core/Inc/mavlink.h:

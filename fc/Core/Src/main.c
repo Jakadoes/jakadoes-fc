@@ -168,6 +168,14 @@ int main(void)
 		Cam_Handle();
 		HAL_Delay(100);
 		//*/
+		//-- code part 4 --
+		/*
+		cam_photo_rx_buffer[100] = 0x44;
+		cam_photo_rx_buffer[101] = 0x55;
+		cam_photo_rx_buffer[102] = 0x66;
+		Cam_Transmit_Photo(100, 3);
+		HAL_Delay(1000);
+		*/
 		//**************end of cam test code*************
 
 

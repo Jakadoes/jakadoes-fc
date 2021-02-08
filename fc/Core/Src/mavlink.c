@@ -96,11 +96,14 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 	uint8_t network_id = 0;//for broadcast
 	uint8_t target_system = 0;//for broadcast
 	uint8_t target_component = 0;//for broadcast
-	uint8_t payload_new[251];//copy payload to new array for fixed size of 251
+	uint8_t payload_new[251] = {0};//copy payload to new array for fixed size of 251
 	payload_new[0] = payload_len; //encode first byte as amount of space used in payload
+
 	for (uint8_t i=1;i<251;i++)
 	{	if(i <payload_len+1)
 		{
+			//Radio_Transmit_Raw(&payload[i-1], 1);
+			//HAL_Delay(500);
 			payload_new[i] = payload[i-1];
 		}
 		else
@@ -108,6 +111,8 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 			payload_new[i] = 0xFF;//fill dead space
 		}
 	}
+	//Radio_Transmit_Raw(&payload_new,payload_len+1 );
+	HAL_Delay(500);
 	//strcpy(payload_new,payload);
 
 	//create buffer of proper length
@@ -120,7 +125,7 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 	msgStruct.target_network = network_id;
 	msgStruct.target_system = target_system;
 	msgStruct.target_component = target_component;
-	strcpy(msgStruct.payload,payload_new);
+	memcpy(msgStruct.payload,payload_new, sizeof(payload_new));
 
 	//encode and serialize
 	mavlink_msg_file_transfer_protocol_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);

@@ -150,8 +150,9 @@ class InstrumentPanel(GridLayout):
 class CommandWidget(GridLayout):
     motorPanel = ObjectProperty(None)
     terminal = ObjectProperty(None)
-    serialHandler = SerialHandler()
+    serialHandler  = SerialHandler()
     gamepadHandler = GamepadHandler()
+    cameraFeed     = CameraFeed()
 
     def start(self, vel=(4, 0)):
        pass

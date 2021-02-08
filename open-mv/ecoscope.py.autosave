@@ -162,7 +162,7 @@ class I2cHandler():
                         img_buffer[i] = fireData.photoData[RED][index+i] #sudo photo data
                     else:
                         img_buffer[i] = 255#stuff with blank data
-                print(img_buffer)
+                #print(img_buffer)
                 #
                 self.Transmit(img_buffer)#must transmit as fast as possible
                 #self.Transmit(img_buffer)

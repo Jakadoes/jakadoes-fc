@@ -44,10 +44,18 @@
 
 <CameraFeed>:
     rows: 1
-    Label:
-        font_size: 15
-        text: 'No Camera Feed available'
-
+    CameraPlacehold:
+        
+<CameraPlacehold>:
+    rows: 1
+    Image: 
+        source: '../img/static.gif'
+        allow_stretch: True
+        Label:
+            center: self.parent.center #needed to put overlabel 
+            font_size: 20
+            bold: True
+            text: 'No Camera Feed available'
 <TerminalInput>:
     textInput: textInput
     rows: 1
@@ -234,6 +242,7 @@
     colorSecondary: 0.1,0.9,0.1,1
     motorPanel: motorPanel
     terminal: terminal
+    cameraFeed: camerafeed
     rows: 2
     canvas:
         #Rectangle:
@@ -281,6 +290,7 @@
             size_hint: 0.35,1
             text: 'right half2'
             CameraFeed:
+                id: camerafeed
                 size_hint: 1,0.5
             ButtonPanel: 
                 size_hint: 1,0.5

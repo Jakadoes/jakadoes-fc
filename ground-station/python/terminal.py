@@ -70,8 +70,12 @@ class Terminal(FocusBehavior, GridLayout):
         #process enter event from input to terminal 
         #print(instance.text)
         self.LogMessage(instance.text)
-        #print(self.app)
-        if(self.mode == TerminalModes.SERIALMONITOR):
+        if(instance.text == ">db-camshow"):
+            self.app.root.cameraFeed.ShowImage(4)
+        elif(instance.text == ">db-camhide"):
+            self.app.root.cameraFeed.ClearImage()   
+
+        if(self.mode == TerminalModes.SERIALMONITOR and not(self.app.root.serialHandler.ser == None) ):
             self.app.root.serialHandler.sendRawPacket(instance.text)
         instance.text = '>'#reset after enter
         Clock.schedule_once(self.RefocusInput) #keep input selected after pressing enter

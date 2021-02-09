@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image as PILImage
 import numpy as np
 from blinker.base import Signal
 from kivy.app import App
@@ -6,13 +6,14 @@ from kivy.uix.widget import Widget
 from kivy.properties import (
     NumericProperty, ReferenceListProperty, ObjectProperty
 )
-from kivy.vector import Vector
-from kivy.clock import Clock
+from kivy.uix.label import Label
+from kivy.uix.image import Image as kivyImage
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.window import Window 
 from kivy.uix.textinput import TextInput
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors.focus import FocusBehavior
+from numpy.lib.utils import source
 #pip or naitive imports
 import serial
 import time 
@@ -20,6 +21,7 @@ import blinker
 import enum
 
 class CameraFeed(GridLayout):
+    app = None
     imgData = None
     arrData = None
     imgWidth = 0
@@ -31,6 +33,11 @@ class CameraFeed(GridLayout):
         #self.InitImgData(numrows= 10, numcols=13)#subdiv 25 #THIS IS WRONG, FIX DIMENSIONS
         #should be (240/subDiv, 320/10)
         #Clock.schedule_once(self.after_init)#provide ref to app after inits 
+
+    def after_init(self, dt): #provide refference to app or other widgets after initializations
+        self.app= App.get_running_app()
+        if(self.app == None):
+            print('WARNING: refference to app was not made, null pointers may occur')
 
     def InitImgData(self, numrows, numcols):
         self.imgData = np.zeros( (numrows, numcols ) ).astype(np.uint8)
@@ -51,12 +58,30 @@ class CameraFeed(GridLayout):
     
     def SaveData(self, fileNum):
         #save txt and png of data 
-        im_show = Image.fromarray(self.imgData, "P")#grayscale
+        im_show = PILImage.fromarray(self.imgData, "P")#grayscale
         im_show.save("capturedImage" + str(fileNum) + ".png")
         f = open("capturedData" + str(fileNum) + ".txt", "w")
         for i in range(len(self.arrData)):
             f.write(str(self.arrData[i]) + "\n")
         f.close()
+    
+    def ShowImage(self, fileNum):
+        self.clear_widgets()
+        img = kivyImage(source='../img/capturedImage' + str(fileNum) + '.png', allow_stretch=True)
+        self.add_widget(img)
+    
+    def ClearImage(self):
+        self.clear_widgets()
+        #img = kivyImage(source='../img/static.gif', allow_stretch=True)
+        #label = Label(text='No Camera Feed Available...', font_size=17, bold=True, center=img.parent.center)
+        #img.add_widget(label)
+        place = CameraPlacehold()
+        self.add_widget(place)
+        #place.center = self.center
+        
+
+class CameraPlacehold(GridLayout):
+    pass
 
 '''
 img = np.zeros( (int(240/5), int(320/5))).astype(np.uint8)

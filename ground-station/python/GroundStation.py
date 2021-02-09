@@ -124,8 +124,6 @@ class ButtonPanel(GridLayout):
         print("connect to radio button panel method called..")
         self.app.root.serialHandler.ConnectToRadio(int(self.radio_port_input.text))
 
-
-
 class Instrument(Widget):
     reading = NumericProperty(0)
 
@@ -148,11 +146,13 @@ class InstrumentPanel(GridLayout):
         self.instrument1.GetReading()
         
 class CommandWidget(GridLayout):
-    motorPanel = ObjectProperty(None)
-    terminal = ObjectProperty(None)
+    motorPanel     = ObjectProperty(None)
+    terminal       = ObjectProperty(None)
+    cameraFeed     = ObjectProperty(None)
     serialHandler  = SerialHandler()
     gamepadHandler = GamepadHandler()
-    cameraFeed     = CameraFeed()
+    #cameraFeed     = CameraFeed()
+    
 
     def start(self, vel=(4, 0)):
        pass

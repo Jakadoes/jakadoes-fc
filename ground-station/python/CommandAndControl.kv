@@ -27,17 +27,29 @@
 <ButtonPanel>:
     radio_connect_button: radio_connect_button
     radio_port_input: radio_port_input
-    rows: 3
-    cols: 3
+    rows: 2
+    cols: 2
     Button:
         text: 'ARM'
-    Button:
-        id: radio_connect_button
-        text: 'Connect to radio'
-
-    TextInput:
-        id: radio_port_input
-        text: 'select radio com port'
+        size_hint: 0.18,0.6
+    GridLayout:
+        size_hint: 0.,0.6
+        rows: 2
+        Button:
+            id: radio_connect_button
+            text: 'No Radio \nConnection'
+            size_hint: 1,0.6
+        GridLayout:
+            cols: 2
+            size_hint: 1,0.2
+            Button:
+                id: radio_connect_button
+                text: '>'
+                size_hint: 0.18,1
+            TextInput:
+                id: radio_port_input
+                text: 'port#'
+                size_hint: 0.8,1
     Label:
     Label:
     Label:

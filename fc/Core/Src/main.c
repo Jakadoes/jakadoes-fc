@@ -25,6 +25,7 @@
 #include "barometer.h"
 #include "cam.h"
 #include "mavlink.h"
+#include "mpu.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,7 +78,7 @@ int main(void)
 	MX_TIM4_Init();
 	MX_I2C2_Init();
 	MX_GPIO_Init();
-
+	Mpu_Wake();
 	//initialize variables
 	//uint8_t baro_test = 9;
 	//uint8_t baro_ready_status;
@@ -117,7 +118,30 @@ int main(void)
 		//****start of mpu test code****
 		//uint8_t mpu_status = Mpu_Is_Ready();
 		//Radio_Transmit_Raw(&mpu_status, 1);
+		//****start of MPU test code****
+		//uint8_t mpu_status = Mpu_Is_Ready();
+		//Radio_Transmit_Raw(&mpu_status, 1);
+		if(Mpu_Is_Ready() == HAL_OK)
+		{
+			Mpu_Get_Acc_Data(MPU_AXIS_X);
+			HAL_Delay(5);
+			Mpu_Get_Acc_Data(MPU_AXIS_Y);
+			HAL_Delay(5);
+			Mpu_Get_Acc_Data(MPU_AXIS_Z);
+			HAL_Delay(5);
+			Mpu_Get_Gyro_Data(MPU_AXIS_X);
+			HAL_Delay(5);
+			Mpu_Get_Gyro_Data(MPU_AXIS_Y);
+			HAL_Delay(5);
+			//Mpu_Get_Gyro_Data(MPU_AXIS_Z);
+			//uint8_t buff[2];
+			//Helper_Int16arr_To_Int8arr(&mpu_acc, 1, &buff);
+			//Radio_Transmit_Raw(&buff, 2);
+			//HAL_Delay(200);
+			MAV_Send_Raw_Imu();
+		}
 
+		HAL_Delay(50);
 		//****start of FTP test code****
 		//cam FTP test
 		//cam_photo_rx_buffer[100] = 0x44;
@@ -164,10 +188,10 @@ int main(void)
 		HAL_Delay(1000);
 		*/
 		//-- code part 3 --
-		///*
+		/*
 		Cam_Handle();
 		HAL_Delay(100);
-		//*/
+		*/
 		//-- code part 4 --
 		/*
 		cam_photo_rx_buffer[100] = 0x44;
@@ -230,28 +254,6 @@ int main(void)
 */
 //*******end of barometer code*******
 
-		/*
-		for(int i=0;i<4;i++)
-		{
-
-			if(rx_buffer[i] == '0')
-			{
-				HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_RESET);
-				__HAL_TIM_SET_COMPARE(&htim4, timChannels[i], 7);
-			}
-		}
-		*/
-		//HAL_Delay(100);
-		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pulse_width);
-		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, pulse_width);
-		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, pulse_width);
-		//__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, pulse_width);
-		//pulse_width +=1;
-		/*
-		if(pulse_width>10){
-			pulse_width = 8;
-		}
-		*/
 
 	}//end while
 

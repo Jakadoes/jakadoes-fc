@@ -36,19 +36,22 @@ class SerialHandler():
         self.gamepadHandler = self.app.root.gamepadHandler
 
     def ConnectToRadio(self, comNum, useMAV = True):
-        if(useMAV):
-            #Mavlink connection
-            self.mavHandler = telem.MAVHandler()
-            self.mavHandler.Connect('COM' + str(comNum), self.baudRate)
-            self.useMAV = True
-        else:
-            #py serial connection
-            self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT,bytesize=8, parity=serial.PARITY_NONE)  # open serial port
-            self.ser.baudrate = 57600 
-            print(self.ser.name)         # check which port was really used
-            self.useMAV = False
-        #set connection flag 
-        self.isConnected = True
+        try:
+            if(useMAV):
+                #Mavlink connection
+                self.mavHandler = telem.MAVHandler()
+                self.mavHandler.Connect('COM' + str(comNum), self.baudRate)
+                self.useMAV = True
+            else:
+                #py serial connection
+                self.ser = serial.Serial('COM' + str(comNum), timeout=self.READTIMEOUT,bytesize=8, parity=serial.PARITY_NONE)  # open serial port
+                self.ser.baudrate = 57600 
+                print(self.ser.name)         # check which port was really used
+                self.useMAV = False
+            #set connection flag 
+            self.isConnected = True
+        except:
+            self.app.root.terminal.LogMessage(">Connect error: " + str(comNum) + " is not a proper com port, check connections")
     
     def HandleSerial(self):
         if(self.isConnected):

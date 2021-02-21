@@ -130,7 +130,7 @@ void Cam_Transmit_Photo(uint32_t startIndex, uint8_t numBytes)
 	//strncpy(&photo_data[3], &cam_photo_rx_buffer[startIndex], numBytes);
 	Radio_Transmit_Raw(&photo_data, numBytes+3);
 	HAL_Delay(500);
-	MAV_send_File_Transfer_Protocol(&photo_data, numBytes+3);
+	MAV_Send_File_Transfer_Protocol(&photo_data, numBytes+3);
 }
 
 void Cam_Transmit_Photo_Debug(uint32_t startIndex, uint8_t numBytes)

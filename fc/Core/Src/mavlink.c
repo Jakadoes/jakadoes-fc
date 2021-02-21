@@ -31,7 +31,6 @@ uint8_t byte_arr[279];
 uint8_t motor_armed = 0;
 
 void MAV_Parse_Data(){
-	char test[4] = "yayy";
 	Radio_Recieve_Raw(&byte_arr, sizeof(byte_arr));
 	//Radio_Transmit_Raw(&byte_arr, sizeof(byte_arr));
 	//Radio_Transmit_Raw(&"msgid", 4);
@@ -70,6 +69,55 @@ void MAV_Parse_Data(){
 	}//end for
 }
 
+void MAV_Send_Raw_Imu()
+{//sends IMU data through radio to ground station
+	//uint8_t test = 255;
+	//int8_t test2 = -1;
+	//Radio_Transmit_Raw(&test, 1);
+	//Radio_Transmit_Raw(&test2, 1);
+	//test2 = (int8_t) test;
+	//Radio_Transmit_Raw(&test2, 1);
+	//HAL_Delay(500);
+	//Radio_Transmit_Raw(&test, 1);
+	//create buffer of proper length
+	//int PACKET_STATIC_SIZE = 10 + 3 + payload_len + 2; //mavlink[FTP header + payload]mavlink
+	int PACKET_STATIC_SIZE = 10 + 29 + 2 ; //mavlink[imu data ]mavlink
+	uint8_t buffer[PACKET_STATIC_SIZE];
+	//test = 0x22;
+	//Radio_Transmit_Raw(&test, 1);
+	//create struct and fill in data
+	mavlink_raw_imu_t msgStruct;
+	msgStruct.time_usec = (uint64_t) 0x3333333333333333;
+	//msgStruct.xacc  = mpu_acc[MPU_AXIS_X];
+	//test = 0x33;
+	//Radio_Transmit_Raw(&test, 1);
+	//msgStruct.yacc  = mpu_acc[MPU_AXIS_Y];
+	//msgStruct.zacc  = mpu_acc[MPU_AXIS_Z];
+	//HAL_Delay(500);
+	msgStruct.xacc  = (int16_t)mpu_acc[MPU_AXIS_X];
+	msgStruct.yacc  = (int16_t)mpu_acc[MPU_AXIS_Y];
+	msgStruct.zacc  = (int16_t)mpu_acc[MPU_AXIS_Z];
+	msgStruct.xgyro = (int16_t)mpu_gyro[MPU_AXIS_X];
+	msgStruct.ygyro = (int16_t)mpu_gyro[MPU_AXIS_Y];
+	msgStruct.zgyro = (int16_t)mpu_gyro[MPU_AXIS_Z];
+	msgStruct.xmag  = (int16_t)0x1111;
+	msgStruct.ymag  = (int16_t)0x1111;
+	msgStruct.zmag  = (int16_t)0x1111;
+	msgStruct.id    = (uint8_t)0x11;
+	msgStruct.temperature = (int16_t)0x1111;
+	//test = 0x44;
+	//Radio_Transmit_Raw(&test, 1);
+	//memcpy(msgStruct.payload,payload_new, sizeof(payload_new));
+
+	//encode and serialize
+	mavlink_msg_raw_imu_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
+	mavlink_msg_to_send_buffer(&buffer, &msg);
+	//test = 0x55;
+	//Radio_Transmit_Raw(&test, 1);
+	//transmit
+	Radio_Transmit_Raw(&buffer, sizeof(buffer));
+}
+
 void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value)
 {
 	//create buffer of static proper length (static for this mavlink message)
@@ -88,7 +136,7 @@ void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value)
 	Radio_Transmit_Raw(&buffer, sizeof(buffer));
 }
 
-void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
+void MAV_Send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 {   //sends network id, target system, target component, and payload
     //**NOTE: uses payload within payload, see FTP protocol
 
@@ -112,7 +160,7 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 		}
 	}
 	//Radio_Transmit_Raw(&payload_new,payload_len+1 );
-	HAL_Delay(500);
+	//HAL_Delay(500);
 	//strcpy(payload_new,payload);
 
 	//create buffer of proper length
@@ -135,7 +183,6 @@ void MAV_send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len)
 	Radio_Transmit_Raw(&buffer, sizeof(buffer));
 
 }
-
 
 void MAV_Send_Debug_Statement(char message[], uint32_t value)
 {

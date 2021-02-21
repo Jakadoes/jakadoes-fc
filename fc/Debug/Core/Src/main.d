@@ -253,7 +253,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_heartbeat.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h \
- ../Core/Inc/mavlink.h
+ ../Core/Inc/mpu.h ../Core/Inc/mavlink.h ../Core/Inc/mpu.h
 
 ../Core/Inc/main.h:
 
@@ -771,4 +771,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h:
 
+../Core/Inc/mpu.h:
+
 ../Core/Inc/mavlink.h:
+
+../Core/Inc/mpu.h:

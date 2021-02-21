@@ -81,6 +81,8 @@ class MAVHandler():
             return
         elif (msg.get_type() == "NAMED_VALUE_INT"):
             self.HandleNamedValueInt(msg)
+        elif (msg.get_type() == "RAW_IMU"):
+            self.HandleRawIMU(msg)
         elif (msg.get_type() == "FILE_TRANSFER_PROTOCOL"):
             self.HandleFileTransferProtocol(msg)
         
@@ -94,11 +96,21 @@ class MAVHandler():
                 self.app.root.serialHandler.fireAlert = False
             elif(msg.value == self.ALERT_FIRE_ALERT or msg.value == self.ALERT_FIRE_STORED):
                 self.app.root.serialHandler.fireAlert = True
+                if(msg.value == self.ALERT_FIRE_ALERT):
+                    self.app.root.cameraFeed.ShowFireDetect()
                 #***invoke a HandleFireAlert method based on this flag***
             else:
                 print("warning: FireAlert content was not an expected enum, data may be corrupted")
         elif(msg.name == "CAM_DONE"):
             self.app.root.cameraFeed.SaveData(4)#save data to file space 1 
+    def HandleRawIMU(self, msg):
+        #print("accel data",msg.xacc,msg.yacc,msg.zacc)
+        print("gyro data",msg.xgyro,msg.ygyro,msg.zgyro)
+        self.app.root.instPanel.instrument1.reading     = msg.xacc/-100.0
+        self.app.root.instPanel.instrument1.reading_sub = msg.yacc/-100.0
+        self.app.root.instPanel.instrument2.reading     = msg.ygyro/100.0 #NOTEE THIS IS FLIPPED FROM ACC 
+        self.app.root.instPanel.instrument2.reading_sub = msg.xgyro/-100.0
+
     def HandleFileTransferProtocol(self, msg):
         print("FTP message received")
         print(msg.payload)

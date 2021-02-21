@@ -251,7 +251,8 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/minimal.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_heartbeat.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h \
- ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h
+ ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h \
+ ../Core/Inc/mpu.h
 
 ../Core/Inc/cam.h:
 
@@ -764,3 +765,5 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h:
 
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h:
+
+../Core/Inc/mpu.h:

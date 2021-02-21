@@ -74,6 +74,8 @@ class Terminal(FocusBehavior, GridLayout):
             self.app.root.cameraFeed.ShowImage(4)
         elif(instance.text == ">db-camhide"):
             self.app.root.cameraFeed.ClearImage()   
+        elif(instance.text == ">db-camdetect"):
+            self.app.root.cameraFeed.ShowFireDetect()
 
         if(self.mode == TerminalModes.SERIALMONITOR and not(self.app.root.serialHandler.ser == None) ):
             self.app.root.serialHandler.sendRawPacket(instance.text)

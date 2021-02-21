@@ -1,5 +1,6 @@
 "Core/Src/barometer.o"
 "Core/Src/cam.o"
+"Core/Src/control.o"
 "Core/Src/helpers.o"
 "Core/Src/i2c.o"
 "Core/Src/main.o"

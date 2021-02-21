@@ -65,6 +65,11 @@ class CameraFeed(GridLayout):
             f.write(str(self.arrData[i]) + "\n")
         f.close()
     
+    def ShowFireDetect(self):
+        self.clear_widgets()
+        place = CameraFireDetected()
+        self.add_widget(place)
+
     def ShowImage(self, fileNum):
         self.clear_widgets()
         img = kivyImage(source='../img/capturedImage' + str(fileNum) + '.png', allow_stretch=True)
@@ -79,8 +84,10 @@ class CameraFeed(GridLayout):
         self.add_widget(place)
         #place.center = self.center
         
-
+#Kivy class templates for to be called for display in camera feed 
 class CameraPlacehold(GridLayout):
+    pass
+class CameraFireDetected(GridLayout):
     pass
 
 '''

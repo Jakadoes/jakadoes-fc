@@ -56,7 +56,10 @@ class ButtonPanel(GridLayout):
     
     def ConnectToRadio(self, trashVariable):#button event passes two arguments, but none needed
         print("connect to radio button panel method called..")
-        self.app.root.serialHandler.ConnectToRadio(int(self.radio_port_input.text))
+        try:
+            self.app.root.serialHandler.ConnectToRadio(int(self.radio_port_input.text))
+        except:
+            self.app.root.terminal.LogMessage(">Connect error: " + self.radio_port_input.text + " is not a proper com port, check connections")
 
 class Instrument(Widget):
     reading = NumericProperty(0)
@@ -81,6 +84,7 @@ class InstrumentPanel(GridLayout):
         
 class CommandWidget(GridLayout):
     motorPanel     = ObjectProperty(None)
+    instPanel      = ObjectProperty(None)
     terminal       = ObjectProperty(None)
     cameraFeed     = ObjectProperty(None)
     serialHandler  = SerialHandler()

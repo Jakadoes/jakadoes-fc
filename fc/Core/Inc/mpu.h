@@ -33,6 +33,7 @@ uint16_t  mpu_gyro[3];//stored data as [x,y,z]
 
 uint8_t Mpu_Is_Ready();
 void    Mpu_Wake();
-void Mpu_Get_Gyro_Data(uint8_t gyro_axis);
-void Mpu_Get_Acc_Data(uint8_t acc_axis);
-void Mpu_Read(uint8_t regNum, uint8_t* buffer );
+void 	Mpu_Update_Values();
+void 	Mpu_Get_Gyro_Data(uint8_t gyro_axis);
+void 	Mpu_Get_Acc_Data(uint8_t acc_axis);
+void 	Mpu_Read(uint8_t regNum, uint8_t* buffer );

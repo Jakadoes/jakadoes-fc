@@ -35,12 +35,27 @@ void Mpu_Wake()
 	Mpu_Write(MPU_REG_GYRO_CONFIG, gyro_config);
 }
 
+void Mpu_Update_Values()
+{//need to address HAL delay with proper blocking protocol
+	Mpu_Get_Acc_Data(MPU_AXIS_X);
+	HAL_Delay(1);
+	Mpu_Get_Acc_Data(MPU_AXIS_Y);
+	HAL_Delay(1);
+	Mpu_Get_Acc_Data(MPU_AXIS_Z);
+	HAL_Delay(1);
+	Mpu_Get_Gyro_Data(MPU_AXIS_X);
+	HAL_Delay(1);
+	Mpu_Get_Gyro_Data(MPU_AXIS_Y);
+	HAL_Delay(1);
+}
+
 void Mpu_Get_Gyro_Data(uint8_t gyro_axis)
 {
 	uint8_t command = MPU_REG_GYRO_X + 2*gyro_axis;
 	Mpu_Read(command, &mpu_gyro_buffer);
 	mpu_gyro[gyro_axis] = (((uint16_t) mpu_gyro_buffer[0])<<8) + ((uint16_t) mpu_gyro_buffer[1]);
 }
+
 void Mpu_Get_Acc_Data(uint8_t acc_axis)
 {
 	uint8_t command = MPU_REG_ACC_X + 2*acc_axis;

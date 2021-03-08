@@ -1,3 +1,4 @@
-motor.c:15:6:Motor_Arm	16	static
-motor.c:26:6:Motor_Set_Speed_Single	24	static
-motor.c:33:6:Motor_Set_Speed_All	24	static
+motor.c:20:6:Motor_Arm	16	static
+motor.c:31:6:Motor_Set_Speed_Single	24	static
+motor.c:39:6:Motor_Set_Speed_All	24	static
+motor.c:48:6:Motor_Set_Speed_Controlled	32	static

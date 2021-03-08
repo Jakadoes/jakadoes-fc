@@ -26,13 +26,14 @@
 uint8_t  mpu_rx_buffer[1];
 uint8_t  mpu_gyro_buffer[2];
 uint8_t  mpu_acc_buffer[2];
-uint16_t mpu_acc[3];//stored data as [x,y,z]
+int16_t mpu_acc[3];//stored data as [x,y,z]
 uint16_t  mpu_gyro[3];//stored data as [x,y,z]
 
 #endif /* INC_MPU_H_ */
 
 uint8_t Mpu_Is_Ready();
 void    Mpu_Wake();
+void    Mpu_Calibrate();
 void 	Mpu_Update_Values();
 void 	Mpu_Get_Gyro_Data(uint8_t gyro_axis);
 void 	Mpu_Get_Acc_Data(uint8_t acc_axis);

@@ -75,12 +75,52 @@ class GamepadHandler(object):
         if( axisid == self.LEFTTRIGGER or axisid == self.RIGHTTRIGGER):
             value_rounded = round(-1*value_rounded + 100, 2) #its flipped by default
 
-        self.ProcessRCData(axisid,value_rounded)
+        self.ProcessRCDataGuided(axisid,value_rounded)
         self.GraphicsFeedback(axisid, value_rounded)
         #send command to FC through radio
         #self.serialHandler.sendMotorCommand(axisid, value)
 
-    def ProcessRCData(self, axisid, value_rounded):
+    def ProcessRCDataGuided(self, axisid, value_rounded):
+        #send manual RC control commands 
+        #NOTE: motors are defined from front left clockwise as 1,2,3,4 in this scope ONLY
+        
+        #thrust
+        if(axisid == self.RIGHTSTICK_Y):
+            self.Thrust = round( (value_rounded + self.THRUST_CAL)*self.THRUST_LIMIT , 2)
+        #Roll
+        elif(axisid == self.LEFTSTICK_X):
+            self.Roll = round(value_rounded + self.ROLL_CAL, 2)
+        #pitch
+        elif(axisid == self.LEFTSTICK_Y):
+            self.Pitch = round(value_rounded + self.PITCH_CAL, 2)
+        #yaw
+        elif(axisid == self.LEFTTRIGGER):
+            self.YAW = round(-1*value_rounded + self.YAW_CAL, 2)
+        elif(axisid == self.RIGHTTRIGGER):
+            self.YAW = round(value_rounded, 2)
+        #print("commands: ")
+        #print("thrust:",self.Thrust,"yaw:", self.yaw,"pitch", self.Pitch,"roll", self.Roll)
+
+        #Process RC signal per motor channel
+        #output should be -100 to 100, however never passes (-80,80), this is because on joystick (round) you cant have max x and y (not square)
+        #to get to 100, use math to determine circular max
+        #calculate thrust, then add clipped dynamic modifier, finally adding minimum common mode thrust 
+        rc1 = self.Pitch
+        rc2 = self.Roll
+        rc3 = self.Thrust
+        rc4 = self.Yaw
+        
+        #print("RC Data processed: ")
+        #print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
+        self.rc1 = rc1
+        self.rc2 = rc2
+        self.rc3 = rc3
+        self.rc4 = rc4
+        #old - event based transmission
+        #if(self.serialHandler.isConnected):
+        #    self.serialHandler.mavHandler.SendRCData(rc1, rc2, rc3, rc4)
+    def ProcessRCDataManual(self, axisid, value_rounded):
+        #send manual RC control commands 
         #NOTE: motors are defined from front left clockwise as 1,2,3,4 in this scope ONLY
         
         #thrust

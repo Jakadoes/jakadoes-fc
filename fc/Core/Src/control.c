@@ -8,26 +8,35 @@
 //to do:
 //implement FIFO for previous results storing
 //Implement moving average to filter accelerometer data
+#include "control.h"
 #include "mpu.h"
-int16_t control_targets[3]; //holds target angles of [x,y,z] orientations
+#include "stm32f1xx_hal.h"
+int16_t control_targets[4]; //holds target angles of [pitch(y), roll(x), thrust, yaw(z) targets]
 int16_t control_errors[6];  //holds errors of [x,y,z,xgyro,ygyro,zgyro]
 int16_t control_output[3];  //holds most recent output values of [x,y,z] orientations
-int16_t control_k=1;
-int16_t control_dk=0;
-uint32_t control_time_old = HAL_GetTick();
+int16_t control_k=2;//uni gain
+int16_t control_dk=1;//derivative gain
+uint32_t control_time_old = 0;
 uint32_t control_dt = 0;
 
-void Control_Set_Target(x_tilt, y_tilt, z_tilt)
+void Control_Set_Target(int16_t pitch,int16_t roll,int16_t thrust, int16_t yaw)
 {
-	control_targets[MPU_AXIS_X] = x_tilt;
-	control_targets[MPU_AXIS_Y] = y_tilt;
-	control_targets[MPU_AXIS_Z] = z_tilt;
+	control_targets[CONTROL_PITCH] = pitch;
+	control_targets[CONTROL_ROLL] = roll;
+	control_targets[CONTROL_THRUST] = thrust;
+	control_targets[CONTROL_YAW] = yaw;
 }
 
-
-int16_t Control_Calculate_Error(target, current)
+void Control_Tick()
 {
-	int16_t error = x_target - x_current;
+	Control_Update_Errors();
+	Control_Update_Outputs();
+	MAV_Send_Msg_Named_Value_Int("target", control_targets[0]);
+}
+
+int16_t Control_Calculate_Error(int16_t target,int16_t current)
+{
+	int16_t error = target - current;
 	return error;
 }
 
@@ -45,24 +54,24 @@ void Control_Update_Errors()
 	control_errors[MPU_AXIS_Z+3] = ((control_errors[MPU_AXIS_Z] > 0) - (control_errors[MPU_AXIS_Z] < 0))* mpu_gyro[MPU_AXIS_Z];
 }
 
-int16_t Control_Calculate_Output(const axis)
+int16_t Control_Calculate_Output(int axis)
 {	//fix dk control by adding history of error
 	int16_t output = control_k*(control_errors[axis]) + -1*control_dk*(control_errors[axis + 3]);
 	return output;
 }
 
-void Control_Update_Outputs(const axis)
+void Control_Update_Outputs()
 {
-	Control_Update_Dt();
-	control_outputs[MPU_AXIS_X] = Control_Calulate_Output(MPU_AXIS_X);
-	control_outputs[MPU_AXIS_Y] = Control_Calulate_Output(MPU_AXIS_Y);
-	control_outputs[MPU_AXIS_Z] = Control_Calulate_Output(MPU_AXIS_Z);
+	//Control_Update_Dt();
+	control_output[MPU_AXIS_X] = Control_Calculate_Output(MPU_AXIS_X);
+	control_output[MPU_AXIS_Y] = Control_Calculate_Output(MPU_AXIS_Y);
+	control_output[MPU_AXIS_Z] = Control_Calculate_Output(MPU_AXIS_Z);
 }
 
 void Control_Update_Dt()
 {
 	control_dt =  HAL_GetTick() - control_time_old;
-	control_time_old = Hal_GetTick();
+	control_time_old = HAL_GetTick();
 }
 
 

@@ -8,12 +8,13 @@
 #include "stdint.h"
 #include "i2c.h"
 
-uint8_t mpu_rx_buffer[1];
-uint8_t mpu_gyro_buffer[2];
-uint8_t mpu_acc_buffer[2];
-uint8_t mpu_setting_buffer[1];
+uint8_t  mpu_rx_buffer[1];
+uint8_t  mpu_gyro_buffer[2];
+uint8_t  mpu_acc_buffer[2];
+uint8_t  mpu_setting_buffer[1];
 uint16_t mpu_gyro[3] = {0};//stored data as [x,y,z]
-uint16_t mpu_acc[3] = {0};//stored data as [x,y,z]
+int16_t mpu_acc[3] = {0};//stored data as [x,y,z]
+int16_t  mpu_cal[3];     //holds calibration data of accelerometer (board is tilted up slightly)
 
 uint8_t Mpu_Is_Ready()
 {
@@ -33,6 +34,14 @@ void Mpu_Wake()
 	//gyrometer settings
 	uint8_t gyro_config = 0b00000000;//set full scale range
 	Mpu_Write(MPU_REG_GYRO_CONFIG, gyro_config);
+}
+
+void Mpu_Calibrate()
+{//sets calibration values as current accelerometer reading to account for board tilt
+	Mpu_Update_Values();
+	mpu_cal[MPU_AXIS_X] = mpu_acc[MPU_AXIS_X];
+	mpu_cal[MPU_AXIS_Y] = mpu_acc[MPU_AXIS_Y];
+	mpu_cal[MPU_AXIS_Z] = mpu_acc[MPU_AXIS_Z];
 }
 
 void Mpu_Update_Values()
@@ -64,6 +73,7 @@ void Mpu_Get_Acc_Data(uint8_t acc_axis)
 	//Radio_Transmit_Raw(&mpu_acc_buffer, 2);
 	//HAL_Delay(1000);
 	mpu_acc[acc_axis] = (((uint16_t) mpu_acc_buffer[0])<<8) + ((uint16_t) mpu_acc_buffer[1]);
+	mpu_acc[acc_axis] = mpu_acc[acc_axis] - mpu_cal[acc_axis];
 
 }
 

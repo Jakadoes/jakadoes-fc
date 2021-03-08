@@ -21,6 +21,8 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rtc.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rtc_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
@@ -252,7 +254,7 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_heartbeat.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../common/../minimal/./mavlink_msg_protocol_version.h \
  ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h \
- ../Core/Inc/mpu.h
+ ../Core/Inc/mpu.h ../Core/Inc/control.h
 
 ../Core/Inc/cam.h:
 
@@ -299,6 +301,10 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h:
 
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
+
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rtc.h:
+
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rtc_ex.h:
 
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 
@@ -767,3 +773,5 @@ Core/Src/cam.o: ../Core/Src/cam.c ../Core/Inc/cam.h \
 ../Core/Inc/..\..\Drivers\c_library_v2\standard\../mavlink_get_info.h:
 
 ../Core/Inc/mpu.h:
+
+../Core/Inc/control.h:

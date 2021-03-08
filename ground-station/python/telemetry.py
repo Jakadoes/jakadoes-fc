@@ -108,8 +108,10 @@ class MAVHandler():
         print("gyro data",msg.xgyro,msg.ygyro,msg.zgyro)
         self.app.root.instPanel.instrument1.reading     = msg.xacc/-100.0
         self.app.root.instPanel.instrument1.reading_sub = msg.yacc/-100.0
-        self.app.root.instPanel.instrument2.reading     = msg.ygyro/100.0 #NOTEE THIS IS FLIPPED FROM ACC 
+        self.app.root.instPanel.instrument2.reading     = msg.ygyro/100.0 #NOTEE GYRO IS FLIPPED FROM ACC (see mpu data sheet)
         self.app.root.instPanel.instrument2.reading_sub = msg.xgyro/-100.0
+        self.app.root.instPanel.instrument3.reading     = msg.xmag/-100.0 
+        self.app.root.instPanel.instrument3.reading_sub = msg.ymag/-100.0
 
     def HandleFileTransferProtocol(self, msg):
         print("FTP message received")

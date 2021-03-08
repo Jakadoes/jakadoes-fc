@@ -1,6 +1,8 @@
-mpu.c:18:9:Mpu_Is_Ready	16	static
-mpu.c:25:6:Mpu_Wake	16	static
-mpu.c:38:6:Mpu_Get_Gyro_Data	24	static
-mpu.c:44:6:Mpu_Get_Acc_Data	24	static
-mpu.c:55:6:Mpu_Write	24	static
-mpu.c:63:6:Mpu_Read	24	static
+mpu.c:19:9:Mpu_Is_Ready	16	static
+mpu.c:26:6:Mpu_Wake	16	static
+mpu.c:39:6:Mpu_Calibrate	8	static
+mpu.c:47:6:Mpu_Update_Values	8	static
+mpu.c:61:6:Mpu_Get_Gyro_Data	24	static
+mpu.c:68:6:Mpu_Get_Acc_Data	24	static
+mpu.c:80:6:Mpu_Write	24	static
+mpu.c:88:6:Mpu_Read	24	static

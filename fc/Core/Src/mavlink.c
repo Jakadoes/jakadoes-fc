@@ -53,7 +53,11 @@ void MAV_Parse_Data(){
 			 		//MAV_Send_Debug_Statement("rc1", rc_channels_scaled_msg.chan1_scaled);
 			 		//MAV_Send_Debug_Statement("rc2", rc_channels_scaled_msg.chan2_scaled);
 			 		//MAV_Send_Debug_Statement("rc3", rc_channels_scaled_msg.chan3_scaled);
-
+			 		//~~~~code for guided RC control
+			 		//in guided mode, RC channels are pitch, roll, thrust, yaw
+			 		Control_Set_Target(rc_channels_scaled_msg.chan1_scaled,rc_channels_scaled_msg.chan2_scaled,rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);//channel values are int16
+			 		//~~~~code for Manual RC control
+			 		/*
 			 		 //for now, set this to arm motors
 			 		if(motor_armed == 0){
 			 			Motor_Arm();
@@ -62,6 +66,7 @@ void MAV_Parse_Data(){
 			 		//set motor speed
 			 		Motor_Set_Speed_All(rc_channels_scaled_msg.chan1_scaled, rc_channels_scaled_msg.chan2_scaled, rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);
 			 		break;
+			 		*/
 			 	 }
 			 }//end switch
 			 break;
@@ -100,8 +105,8 @@ void MAV_Send_Raw_Imu()
 	msgStruct.xgyro = (int16_t)mpu_gyro[MPU_AXIS_X];
 	msgStruct.ygyro = (int16_t)mpu_gyro[MPU_AXIS_Y];
 	msgStruct.zgyro = (int16_t)mpu_gyro[MPU_AXIS_Z];
-	msgStruct.xmag  = (int16_t)0x1111;
-	msgStruct.ymag  = (int16_t)0x1111;
+	msgStruct.xmag  = (int16_t)control_output[MPU_AXIS_X];//sends control output
+	msgStruct.ymag  = (int16_t)control_output[MPU_AXIS_Y];//sends control output
 	msgStruct.zmag  = (int16_t)0x1111;
 	msgStruct.id    = (uint8_t)0x11;
 	msgStruct.temperature = (int16_t)0x1111;

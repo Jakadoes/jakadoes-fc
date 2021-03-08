@@ -11,6 +11,7 @@
 #include "..\..\Drivers\c_library_v2\standard\mavlink.h"
 #include "radio.h"
 #include "mpu.h"
+#include "control.h"
 
 #endif /* INC_MAVLINK_H_ */
 

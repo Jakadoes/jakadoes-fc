@@ -1,2 +1,7 @@
-control.c:9:6:Control_Set_Target	4	static
-control.c:13:6:Control_Calculate_Output	4	static
+control.c:22:6:Control_Set_Target	16	static
+control.c:30:6:Control_Tick	8	static
+control.c:37:9:Control_Calculate_Error	24	static
+control.c:43:6:Control_Update_Errors	8	static
+control.c:57:9:Control_Calculate_Output	24	static
+control.c:63:6:Control_Update_Outputs	8	static
+control.c:71:6:Control_Update_Dt	8	static

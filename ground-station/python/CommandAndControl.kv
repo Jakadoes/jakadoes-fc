@@ -219,6 +219,8 @@
     inst_1_gaugeColor: 0, 0.5, 0.4, 1
     inst_1_name: 'Instrument 1'
     inst_2_name: 'Instrument 2'
+    inst_3_name: 'Instrument 3'
+    inst_4_name: 'Instrument 4'
     colorBackground: 0.05,0.05,0.075,1 
     colorHeader: 0.1,0.1,0.1,1
     colorText: 1,1,1,1
@@ -255,12 +257,12 @@
             colorText: root.colorText
         Instrument: 
             id: inst_3
-            name: 'Instrument 3'
+            name: root.inst_3_name
             gaugeColor: root.inst_1_gaugeColor
             colorText: root.colorText
         Instrument: 
             id: inst_4
-            name: 'Instrument 4'
+            name: root.inst_4_name
             gaugeColor: root.inst_1_gaugeColor
             colorText: root.colorText
 
@@ -303,6 +305,7 @@
                 inst_1_gaugeColor:root.colorPrimary
                 inst_1_name: 'Accelerometer'
                 inst_2_name: 'Gyrometer'
+                inst_3_name: 'Control Output'
                 colorHeader: root.colorHeader
                 colorText: root.colorPrimary
                 colorBackground:root.colorBackground

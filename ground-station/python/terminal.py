@@ -76,7 +76,12 @@ class Terminal(FocusBehavior, GridLayout):
             self.app.root.cameraFeed.ClearImage()   
         elif(instance.text == ">db-camdetect"):
             self.app.root.cameraFeed.ShowFireDetect()
-
+        elif(">set-thrust" in instance.text):
+            value = int( instance.text.split(" ")[1] )
+            self.app.root.gamepadHandler.on_joy_axis(0,0,4,(value*(-32767.0*2))/100)
+        elif(">set-pitch" in instance.text):
+            value = int( instance.text.split(" ")[1] )
+            self.app.root.gamepadHandler.on_joy_axis(0,0,1,(value*(-32767.0*2))/100)
         if(self.mode == TerminalModes.SERIALMONITOR and not(self.app.root.serialHandler.ser == None) ):
             self.app.root.serialHandler.sendRawPacket(instance.text)
         instance.text = '>'#reset after enter

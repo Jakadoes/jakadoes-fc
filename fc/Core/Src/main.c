@@ -83,6 +83,8 @@ int main(void)
 	MX_GPIO_Init();
 	//MX_RTC_Init();
 	Mpu_Wake();
+	HAL_Delay(20);
+	Mpu_Calibrate();//sets initial acc values as calibration
 	//initialize variables
 	//uint8_t baro_test = 9;
 	//uint8_t baro_ready_status;
@@ -109,7 +111,6 @@ int main(void)
 	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
-
 	while(1){
 		//HAL_UART_Transmit(&huart1,(uint8_t*) &rx_buffer, sizeof(rx_buffer),HAL_MAX_DELAY);
 		//HAL_Delay(1);
@@ -119,12 +120,15 @@ int main(void)
 		//MAV_Send_Debug_Statement_Default();
 		//Motor_Set_Speed_All(0,0,0,0);
 		//MAV_Parse_Data();
-		//****start of mpu test code****
-		//uint8_t mpu_status = Mpu_Is_Ready();
-		//Radio_Transmit_Raw(&mpu_status, 1);
+		//**************start of control test code*************
+		MAV_Parse_Data();
+		Control_Tick();
+		HAL_Delay(20);
+		MAV_Send_Raw_Imu();
 		//****start of MPU test code****
 		//uint8_t mpu_status = Mpu_Is_Ready();
 		//Radio_Transmit_Raw(&mpu_status, 1);
+		/*
 		if(Mpu_Is_Ready() == HAL_OK)
 		{
 			Mpu_Get_Acc_Data(MPU_AXIS_X);
@@ -144,8 +148,8 @@ int main(void)
 			//HAL_Delay(200);
 			MAV_Send_Raw_Imu();
 		}
-
 		HAL_Delay(50);
+		*/
 		//****start of FTP test code****
 		//cam FTP test
 		//cam_photo_rx_buffer[100] = 0x44;
@@ -205,7 +209,6 @@ int main(void)
 		HAL_Delay(1000);
 		*/
 		//**************end of cam test code*************
-
 
 		//*******start of barometer code*******
 /*

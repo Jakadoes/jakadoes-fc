@@ -25,22 +25,28 @@ class GamepadHandler(object):
     time_new = [0,0,0,0,0,0,0]#holds elapsed time slots for each axis
     time_old = [0,0,0,0,0,0,0] 
     #declare axisid's of the sticks on Xbox one controller 
-    MIN_TIME_BETWEEN_EVENTS = 0.005 #in s
+    MIN_TIME_BETWEEN_EVENTS = 0.015 #in s
     LEFTSTICK_Y = 1
     LEFTSTICK_X = 0
     RIGHTSTICK_Y = 4
     LEFTTRIGGER = 2
     RIGHTTRIGGER = 5
+    B_BUTTON = 1
+    A_BUTTON = 0
+    X_BUTTON = 2
+    Y_BUTTON = 3
     #store calibaration data
-    THRUST_LIMIT = 0.50 #percentage of max acheivable thrust 
+    THRUST_LIMIT = 0.8 #percentage of max acheivable thrust 
     PITCH_SENS = 0.3
     ROLL_SENS = 0.3
     YAW_SENS = 0.1
     DYNAMIC_THRUST_RANGE = 0.25
     THRUST_CAL = 0
-    PITCH_CAL = -45
+    #PITCH_CAL = -45
+    PITCH_CAL = 0
     YAW_CAL = 0
-    ROLL_CAL = -20
+    #ROLL_CAL = -20
+    ROLL_CAL = 0
     Thrust = 0
     Pitch = 0
     Yaw = 0
@@ -49,6 +55,7 @@ class GamepadHandler(object):
     rc2 = 0
     rc3 = 0
     rc4 = 0
+    state_disarmed = True#used to deactivate stick controls 
 
     def __init__(self, **kwargs):
         super(GamepadHandler, self).__init__(**kwargs)
@@ -71,14 +78,27 @@ class GamepadHandler(object):
     
         #print(win, stickid, axisid, value)
         #normalize input to [-100, 100]
-        value_rounded = round((-100*value)/32767, 2)  
-        if( axisid == self.LEFTTRIGGER or axisid == self.RIGHTTRIGGER):
-            value_rounded = round(-1*value_rounded + 100, 2) #its flipped by default
-
+        if(not(self.state_disarmed)):
+            value_rounded = round((-100*value)/32767, 2)  
+            if( axisid == self.LEFTTRIGGER or axisid == self.RIGHTTRIGGER):
+                value_rounded = round(-1*value_rounded + 100, 2) #its flipped by default
+        else:
+            value_rounded = -100
         self.ProcessRCDataGuided(axisid,value_rounded)
         self.GraphicsFeedback(axisid, value_rounded)
         #send command to FC through radio
         #self.serialHandler.sendMotorCommand(axisid, value)
+    def on_joy_button_down(self, stickid, wasteVariable, buttonid):
+        print("Button pressed")
+        if(buttonid == self.B_BUTTON):
+            self.state_disarmed = True;
+            self.Pitch = 0
+            self.Thrust = 0
+            self.Roll = 0
+            self.Yaw = 0
+        if(buttonid == self.A_BUTTON):
+            self.state_disarmed = False;
+        
 
     def ProcessRCDataGuided(self, axisid, value_rounded):
         #send manual RC control commands 
@@ -86,13 +106,13 @@ class GamepadHandler(object):
         
         #thrust
         if(axisid == self.RIGHTSTICK_Y):
-            self.Thrust = round( (value_rounded + self.THRUST_CAL)*self.THRUST_LIMIT , 2)
+            self.Thrust = round( (value_rounded*self.THRUST_LIMIT + self.THRUST_CAL)*self.THRUST_LIMIT , 2)
         #Roll
         elif(axisid == self.LEFTSTICK_X):
-            self.Roll = round(value_rounded + self.ROLL_CAL, 2)
+            self.Roll = round(value_rounded*self.ROLL_SENS + self.ROLL_CAL, 2)
         #pitch
         elif(axisid == self.LEFTSTICK_Y):
-            self.Pitch = round(value_rounded + self.PITCH_CAL, 2)
+            self.Pitch = round(value_rounded*self.PITCH_SENS + self.PITCH_CAL, 2)
         #yaw
         elif(axisid == self.LEFTTRIGGER):
             self.YAW = round(-1*value_rounded + self.YAW_CAL, 2)
@@ -105,17 +125,13 @@ class GamepadHandler(object):
         #output should be -100 to 100, however never passes (-80,80), this is because on joystick (round) you cant have max x and y (not square)
         #to get to 100, use math to determine circular max
         #calculate thrust, then add clipped dynamic modifier, finally adding minimum common mode thrust 
-        rc1 = self.Pitch
-        rc2 = self.Roll
-        rc3 = self.Thrust
-        rc4 = self.Yaw
-        
+
+        self.rc1 = self.Pitch
+        self.rc2 = self.Roll
+        self.rc3 = self.Thrust
+        self.rc4 = self.Yaw
         #print("RC Data processed: ")
-        #print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
-        self.rc1 = rc1
-        self.rc2 = rc2
-        self.rc3 = rc3
-        self.rc4 = rc4
+        #print("rc1:", self.rc1,"rc2:", self.rc2,"rc3:", self.rc3,"rc4:", self.rc4)
         #old - event based transmission
         #if(self.serialHandler.isConnected):
         #    self.serialHandler.mavHandler.SendRCData(rc1, rc2, rc3, rc4)
@@ -148,9 +164,9 @@ class GamepadHandler(object):
         rc2 = max( (1-self.DYNAMIC_THRUST_RANGE)*self.Thrust + (self.DYNAMIC_THRUST_RANGE/3)*(-1*self.Pitch*self.PITCH_SENS + self.Roll*self.ROLL_SENS - self.Yaw*self.YAW_SENS) , 0) + self.Thrust/10
         rc3 = max( (1-self.DYNAMIC_THRUST_RANGE)*self.Thrust + (self.DYNAMIC_THRUST_RANGE/3)*(self.Pitch*self.PITCH_SENS + self.Roll*self.ROLL_SENS + self.Yaw*self.YAW_SENS) , 0) + self.Thrust/10
         rc4 = max( (1-self.DYNAMIC_THRUST_RANGE)*self.Thrust + (self.DYNAMIC_THRUST_RANGE/3)*(self.Pitch*self.PITCH_SENS - self.Roll*self.ROLL_SENS - self.Yaw*self.YAW_SENS) , 0) + self.Thrust/10
-        
-        #print("RC Data processed: ")
-        #print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
+        #NOTE:::: POTENTIAL BUG WHERE ONLY ONE STICK AXIS IS BEING TRANSMITTED AT A TTIME 
+        print("RC Data processed: ")
+        print("rc1:", rc1,"rc2:", rc2,"rc3:", rc3,"rc4:", rc4)
         self.rc1 = rc1
         self.rc2 = rc2
         self.rc3 = rc3

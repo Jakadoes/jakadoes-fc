@@ -110,6 +110,7 @@ class CommandAndControlApp(App):
         Command.start()
         #bind events
         Window.bind(on_joy_axis=Command.gamepadHandler.on_joy_axis)
+        Window.bind(on_joy_button_down=Command.gamepadHandler.on_joy_button_down)
         Command.terminal.textInput.bind(on_text_validate=Command.terminal.on_enter) #bind events to terminal log input 
         Clock.schedule_interval(Command.update, 1.0 / 60.0) #set update interval (in seconds i think)
         Clock.schedule_interval(Command.HandleSerial, 1.0/ 80.0)#throttle serial commands to not cause UART backup, baud rate / (8*max MAV packet size)

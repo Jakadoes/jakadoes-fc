@@ -45,8 +45,6 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c2;
 
-RTC_HandleTypeDef hrtc;
-
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
@@ -61,7 +59,6 @@ static void MX_GPIO_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM4_Init(void);
-static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,23 +91,24 @@ int main(void)
 	//    1, // System ID2 (1-255)
 	//    1  // Component ID (a MAV_COMPONENT value)
 	//};
-	//Motor_Arm();
+
 	//radio - incoming data will be packeted into four sections: [m1][m2][m3][m4]
 
-	uint8_t payload_test[10] = {1,2,3,4,5,6,7,8,9,10};
+	//uint8_t payload_test[10] = {1,2,3,4,5,6,7,8,9,10};
 	//uint8_t payload_test[10];
-	for (uint8_t i=0; i<10;i++)
-	{
-		payload_test[i] = i+1;
-	}
+	//for (uint8_t i=0; i<10;i++)
+	//{
+		//payload_test[i] = i+1;
+	//}
 	//uint8_t test[5] = {0x55, 0x55, 0x55, 0x55, 0x55};
 	//uint8_t baro_flag = 5;
-	cam_photo_rx_buffer[10] = 0x44;
-	cam_photo_rx_buffer[11] = 0x55;
-	cam_photo_rx_buffer[12] = 0x66;
+	//cam_photo_rx_buffer[10] = 0x44;
+	//cam_photo_rx_buffer[11] = 0x55;
+	//cam_photo_rx_buffer[12] = 0x66;
 	//HAL_Delay(3000);//wait for ESC's to arm, old
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 	//uint8_t timChannels[] = {TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
+	uint8_t poop = 0;
 	while(1){
 		//HAL_UART_Transmit(&huart1,(uint8_t*) &rx_buffer, sizeof(rx_buffer),HAL_MAX_DELAY);
 		//HAL_Delay(1);
@@ -123,8 +121,17 @@ int main(void)
 		//**************start of control test code*************
 		MAV_Parse_Data();
 		Control_Tick();
-		HAL_Delay(20);
-		MAV_Send_Raw_Imu();
+		Motor_Set_Speed_Guided();
+		HAL_Delay(5);
+		if(poop >= 5)
+		{
+			MAV_Send_Raw_Imu();
+			poop = 0;
+		}
+		HAL_Delay(5);
+		//MAV_Send_RC_Channels_Raw();
+		//uint32_t value = 0;
+		//MAV_Send_Msg_Named_Value_Int("bar", value/11);
 		//****start of MPU test code****
 		//uint8_t mpu_status = Mpu_Is_Ready();
 		//Radio_Transmit_Raw(&mpu_status, 1);
@@ -280,15 +287,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
@@ -306,12 +311,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
@@ -352,36 +351,6 @@ static void MX_I2C2_Init(void)
 }
 
 /**
-  * @brief RTC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_RTC_Init(void)
-{
-
-  /* USER CODE BEGIN RTC_Init 0 */
-
-  /* USER CODE END RTC_Init 0 */
-
-  /* USER CODE BEGIN RTC_Init 1 */
-
-  /* USER CODE END RTC_Init 1 */
-  /** Initialize RTC Only
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
-  hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN RTC_Init 2 */
-
-  /* USER CODE END RTC_Init 2 */
-
-}
-
-/**
   * @brief TIM4 Initialization Function
   * @param None
   * @retval None
@@ -416,7 +385,7 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 800;
+  sConfigOC.Pulse = 768;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)

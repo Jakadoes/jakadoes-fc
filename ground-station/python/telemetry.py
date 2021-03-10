@@ -83,6 +83,8 @@ class MAVHandler():
             self.HandleNamedValueInt(msg)
         elif (msg.get_type() == "RAW_IMU"):
             self.HandleRawIMU(msg)
+        elif (msg.get_type() == "RC_CHANNELS_RAW"):
+            self.HandleRCChannelsRaw(msg)
         elif (msg.get_type() == "FILE_TRANSFER_PROTOCOL"):
             self.HandleFileTransferProtocol(msg)
         
@@ -105,14 +107,20 @@ class MAVHandler():
             self.app.root.cameraFeed.SaveData(4)#save data to file space 1 
     def HandleRawIMU(self, msg):
         #print("accel data",msg.xacc,msg.yacc,msg.zacc)
-        print("gyro data",msg.xgyro,msg.ygyro,msg.zgyro)
+        #print("gyro data",msg.xgyro,msg.ygyro,msg.zgyro)
         self.app.root.instPanel.instrument1.reading     = msg.xacc/-100.0
         self.app.root.instPanel.instrument1.reading_sub = msg.yacc/-100.0
         self.app.root.instPanel.instrument2.reading     = msg.ygyro/100.0 #NOTEE GYRO IS FLIPPED FROM ACC (see mpu data sheet)
         self.app.root.instPanel.instrument2.reading_sub = msg.xgyro/-100.0
-        self.app.root.instPanel.instrument3.reading     = msg.xmag/-100.0 
-        self.app.root.instPanel.instrument3.reading_sub = msg.ymag/-100.0
-
+        self.app.root.instPanel.instrument3.reading     = round(msg.xmag/40.0 ,2)
+        self.app.root.instPanel.instrument3.reading_sub = round(msg.ymag/40.0 ,2)
+    def HandleRCChannelsRaw(self,msg):
+        #print("RC Raw channels received")
+        #print(msg.chan1_raw, msg.chan2_raw, msg.chan3_raw, msg.chan4_raw)
+        self.app.root.motorPanel.instrument3.reading     = (msg.chan1_raw-800)/8
+        self.app.root.motorPanel.instrument3.reading_sub = (msg.chan4_raw-800)/8
+        self.app.root.motorPanel.instrument4.reading     = (msg.chan2_raw-800)/8
+        self.app.root.motorPanel.instrument4.reading_sub = (msg.chan3_raw-800)/8
     def HandleFileTransferProtocol(self, msg):
         print("FTP message received")
         print(msg.payload)

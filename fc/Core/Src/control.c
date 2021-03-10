@@ -14,7 +14,7 @@
 int16_t control_targets[4]; //holds target angles of [pitch(y), roll(x), thrust, yaw(z) targets]
 int16_t control_errors[6];  //holds errors of [x,y,z,xgyro,ygyro,zgyro]
 int16_t control_output[3];  //holds most recent output values of [x,y,z] orientations
-int16_t control_k=2;//uni gain
+int16_t control_k=0;//uni gain
 int16_t control_dk=1;//derivative gain
 uint32_t control_time_old = 0;
 uint32_t control_dt = 0;
@@ -31,18 +31,18 @@ void Control_Tick()
 {
 	Control_Update_Errors();
 	Control_Update_Outputs();
-	MAV_Send_Msg_Named_Value_Int("target", control_targets[0]);
+	//MAV_Send_Msg_Named_Value_Int("target", control_targets[0]);
 }
 
 int16_t Control_Calculate_Error(int16_t target,int16_t current)
 {
-	int16_t error = target - current;
+	int16_t error = target*(-10) - current;//factor on target needed to compensate some conversion factor
 	return error;
 }
 
 void Control_Update_Errors()
 {
-	Mpu_Update_Values();
+	Mpu_Update_Values_MA();
 	//accelerometer
 	control_errors[MPU_AXIS_X] = Control_Calculate_Error(control_targets[MPU_AXIS_X], mpu_acc[MPU_AXIS_X]);
 	control_errors[MPU_AXIS_Y] = Control_Calculate_Error(control_targets[MPU_AXIS_Y], mpu_acc[MPU_AXIS_Y]);
@@ -63,9 +63,9 @@ int16_t Control_Calculate_Output(int axis)
 void Control_Update_Outputs()
 {
 	//Control_Update_Dt();
-	control_output[MPU_AXIS_X] = Control_Calculate_Output(MPU_AXIS_X);
-	control_output[MPU_AXIS_Y] = Control_Calculate_Output(MPU_AXIS_Y);
-	control_output[MPU_AXIS_Z] = Control_Calculate_Output(MPU_AXIS_Z);
+	control_output[CONTROL_PITCH] = Control_Calculate_Output(CONTROL_PITCH)/-42;//arbitary scaling
+	control_output[CONTROL_ROLL] = Control_Calculate_Output(CONTROL_ROLL)/-42;
+	//control_output[MPU_AXIS_Z] = Control_Calculate_Output(MPU_AXIS_Z);
 }
 
 void Control_Update_Dt()

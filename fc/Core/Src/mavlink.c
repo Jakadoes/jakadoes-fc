@@ -11,7 +11,7 @@
 //#endif
 
 #include "mavlink.h"
-
+#include "motor.h"
 
 //****variables*****
 //user defined
@@ -55,14 +55,15 @@ void MAV_Parse_Data(){
 			 		//MAV_Send_Debug_Statement("rc3", rc_channels_scaled_msg.chan3_scaled);
 			 		//~~~~code for guided RC control
 			 		//in guided mode, RC channels are pitch, roll, thrust, yaw
-			 		Control_Set_Target(rc_channels_scaled_msg.chan1_scaled,rc_channels_scaled_msg.chan2_scaled,rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);//channel values are int16
-			 		//~~~~code for Manual RC control
-			 		/*
-			 		 //for now, set this to arm motors
+			 		//for now, set this to arm motors
 			 		if(motor_armed == 0){
 			 			Motor_Arm();
 			 			motor_armed = 1;
 			 		}
+			 		Control_Set_Target(rc_channels_scaled_msg.chan1_scaled,rc_channels_scaled_msg.chan2_scaled,rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);//channel values are int16
+			 		//~~~~code for Manual RC control
+			 		/*
+
 			 		//set motor speed
 			 		Motor_Set_Speed_All(rc_channels_scaled_msg.chan1_scaled, rc_channels_scaled_msg.chan2_scaled, rc_channels_scaled_msg.chan3_scaled, rc_channels_scaled_msg.chan4_scaled);
 			 		break;
@@ -73,7 +74,36 @@ void MAV_Parse_Data(){
 	     }//end if
 	}//end for
 }
+void MAV_Handle_RC_Channels_Scaled(mavlink_message_t msg)
+{
 
+}
+void MAV_Send_RC_Channels_Raw()
+{
+	//create buffer of specific length
+	int PACKET_STATIC_SIZE = 10 + 22 + 2 ; //mavlink[imu data ]mavlink
+	uint8_t buffer[PACKET_STATIC_SIZE];
+	//create and fill struct
+	mavlink_rc_channels_raw_t msgStruct;
+	msgStruct.time_boot_ms = 1;
+	msgStruct.port = 1;
+	msgStruct.rssi = 1;
+	msgStruct.chan1_raw = motor_speeds[MOTOR_FRONTLEFT];
+	msgStruct.chan2_raw = motor_speeds[MOTOR_FRONTRIGHT];
+	msgStruct.chan3_raw = motor_speeds[MOTOR_BACKRIGHT];
+	msgStruct.chan4_raw = motor_speeds[MOTOR_BACKLEFT];
+	msgStruct.chan5_raw = 1;
+	msgStruct.chan6_raw = 1;
+	msgStruct.chan7_raw = 1;
+	msgStruct.chan8_raw = 1;
+	//encode and serialize
+	mavlink_msg_rc_channels_raw_encode(SYSTEM_ID, COMPONENT_ID, &msg, &msgStruct);
+	mavlink_msg_to_send_buffer(&buffer, &msg);
+	//test = 0x55;
+	//Radio_Transmit_Raw(&test, 1);
+	//transmit
+	Radio_Transmit_Raw(&buffer, sizeof(buffer));
+}
 void MAV_Send_Raw_Imu()
 {//sends IMU data through radio to ground station
 	//uint8_t test = 255;

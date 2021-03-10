@@ -17,6 +17,7 @@
 
 void MAV_Parse_Data();
 void MAV_Send_Debug_Statement();
+void MAV_Send_RC_Channels_Raw();
 void MAV_Send_Raw_Imu();
 void MAV_Send_File_Transfer_Protocol(uint8_t payload[], uint8_t payload_len);
 void MAV_Send_Msg_Named_Value_Int(char message[], uint32_t value);

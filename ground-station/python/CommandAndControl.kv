@@ -69,7 +69,12 @@
             bold: True
             text: 'No Camera Feed available'
 <CameraFireDetected>:
-    rows: 1
+    textMain: textMain
+    textSub: textSub
+    buttonGrid: buttonGrid
+    buttonYes: buttonYes
+    buttonNo: buttonNo
+    rows: 3
     canvas: 
         Color: 
             rgb: 1,0,0,1
@@ -77,10 +82,74 @@
             size: self.size
             pos: self.pos
     Label:
+        id: textMain
         center: self.parent.center #needed to put overlabel 
+        size_hint: 1,0.3
         font_size: 20
         bold: True
         text: 'Fire Detected'
+    Label:
+        id: textSub
+        center: self.parent.center #needed to put overlabel 
+        size_hint: 1,0.5
+        font_size: 14
+        bold: True
+        text: '\n\nWould you like to download an image?'
+    GridLayout:
+        id: buttonGrid
+        cols: 2
+        size_hint: 0.2,0.3
+        Button:
+            id: buttonYes
+            pos: self.parent.center_x, self.parent.center_y
+            text: 'Yes'
+            size_hint: 0.4,1
+        Button:
+            id: buttonNo
+            pos: self.parent.center_x, self.parent.center_y
+            text: 'No'
+            size_hint: 0.4,1
+
+<CameraFireLoading>:
+    rows: 3
+    progressPercent: 0.0
+    canvas:
+        Color:
+            rgb: 0, 0.5, 0.4, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Label:
+        text: "Loading..."
+    GridLayout:
+        cols:2
+        LoadingBar:
+            percent: root.progressPercent
+        Label: 
+            text: str(root.progressPercent) + "%"
+
+<LoadingBar>:
+    rows:1
+    percent: 50.0
+
+    canvas:
+        Color:
+            rgb: 1, 0.0, 0.0, 0.4
+        Line:
+            id: backdrop
+            width: 8.0
+            cap: 'round'
+            points:[self.center_x-50,self.center_y,self.center_x+50,self.center_y]
+        Color:
+            rgb: 0, 1, 0, 1
+        Line:   
+            id:progressPercent
+            width: 8.0
+            cap: 'round'
+            points:[self.center_x-50, self.center_y, (self.percent/100.0)*((self.center_x+50)-(self.center_x-50))+(self.center_x-50), self.center_y]
+
+
+
 
 <TerminalInput>:
     textInput: textInput
@@ -148,7 +217,7 @@
 <Instrument>:
     name: 'Instrument x'
     size: 50, 50
-    reading: 10.0 #reading gauge displays from 0 to 100 (%) 
+    reading: 10.0 
     reading_sub: 0.00
     maxReading: 100.0
     minReading: -100.0

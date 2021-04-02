@@ -52,6 +52,7 @@ class Terminal(FocusBehavior, GridLayout):
     
     def LogMessage(self, message):
         #add message to log 
+        #print("Message logged: ")
         print(message)
         self.textLog.text = self.textLog.text + '\n' + message
 
@@ -70,22 +71,45 @@ class Terminal(FocusBehavior, GridLayout):
         #process enter event from input to terminal 
         #print(instance.text)
         self.LogMessage(instance.text)
-        if(instance.text == ">db-camshow"):
-            self.app.root.cameraFeed.ShowImage(4)
-        elif(instance.text == ">db-camhide"):
-            self.app.root.cameraFeed.ClearImage()   
-        elif(instance.text == ">db-camdetect"):
-            self.app.root.cameraFeed.ShowFireDetect()
-        elif(">set-thrust" in instance.text):
-            value = int( instance.text.split(" ")[1] )
-            self.app.root.gamepadHandler.on_joy_axis(0,0,4,(value*(-32767.0*2))/100)
-        elif(">set-pitch" in instance.text):
-            value = int( instance.text.split(" ")[1] )
-            self.app.root.gamepadHandler.on_joy_axis(0,0,1,(value*(-32767.0*2))/100)
+        self.HandleTerminalCommand(instance.text)
         if(self.mode == TerminalModes.SERIALMONITOR and not(self.app.root.serialHandler.ser == None) ):
             self.app.root.serialHandler.sendRawPacket(instance.text)
         instance.text = '>'#reset after enter
         Clock.schedule_once(self.RefocusInput) #keep input selected after pressing enter
+    def HandleTerminalCommand(self, command):
+        if(command == ">db-camshow"):
+            self.app.root.cameraFeed.ShowImage(5)
+        elif(command == ">db-camhide"):
+            self.app.root.cameraFeed.ClearImage()   
+        elif(command == ">db-camdetect"):
+            self.app.root.cameraFeed.ShowFireDetect()
+        elif(command == ">db-camload"):
+            self.app.root.cameraFeed.ShowFireLoading()
+        elif(command == ">db-camload -p"):
+            self.app.root.cameraFeed.UpdateProgress(250*100)
+        elif(command == ">db-caminterp"):
+            self.app.root.cameraFeed.TestInterpolate()
+        elif(">set-thrust" in command):
+            value = int( command.split(" ")[1] )
+            self.app.root.gamepadHandler.on_joy_axis(0,0,4,(value*(-32767.0*2))/100)
+        elif(">set-pitch" in command):
+            value = int( command.split(" ")[1] )
+            self.app.root.gamepadHandler.on_joy_axis(0,0,1,(value*(-32767.0*2))/100)
+        elif(">set-motor" in command):
+            #print("Terminal: set motor command called")
+            com_split = command.split(" ")
+            motorNum = int( com_split[1] )
+            motorSpeed = int(com_split[2])
+            if(not(self.app.root.serialHandler.mavHandler == None)):
+                self.app.root.serialHandler.QueueParamSetMsg(motorNum,self.app.root.serialHandler.mavHandler.MSG_PARAM_ID_MOTORSPEED, motorSpeed)
+            else:
+                #self.LogMessage("error, no mav link connection")
+                self.LogMessage("command sent to drone")
+        elif(">db-rcom"):
+            self.app.root.serialHandler.mavHandler.SendRCData(2,2,2,2)
+        else:
+            self.LogMessage("error, command not defined")
+
 
 class TerminalLog(GridLayout, StencilView): #create as stencil view to mask label widget going out of box 
     pass

@@ -45,6 +45,11 @@ class MAVHandler():
     ALERT_FIRE_ALERT    = 0x22
     ALERT_FIRE_STORED   = 0x33
     ALERT_FIRE_NONE = 0x10
+    MOTOR_FRONTLEFT  = 0x00
+    MOTOR_FRONTRIGHT = 0x03
+    MOTOR_BACKLEFT   = 0x02
+    MOTOR_BACKRIGHT  = 0x01
+    MSG_PARAM_ID_MOTORSPEED = "motorspeed000000".encode('utf-8')
     
     def __init__(self, **kwargs):
         super(MAVHandler, self).__init__(**kwargs)
@@ -71,7 +76,9 @@ class MAVHandler():
 
         #print("rc data sent: ", rcData1_scaled, rcData2_scaled, rcData3_scaled, rcData4_scaled)
         self.theConnection.mav.rc_channels_scaled_send(time_boot_ms= 0, port=0,rssi=0, chan1_scaled =  rcData1_scaled, chan2_scaled = rcData2_scaled, chan3_scaled = rcData3_scaled, chan4_scaled = rcData4_scaled, chan5_scaled = 32767, chan6_scaled = 32767, chan7_scaled = 32767, chan8_scaled = 32767)
-
+    def SendParamSet(self, target_component, param_id, param_value):
+        #param_id must be 16 char exactly, set unused chars to zero(0)
+        self.theConnection.mav.param_set_send(target_system=0, target_component = target_component, param_id = param_id, param_value = param_value, param_type = 0)
     def HandleMessage(self):
         #handler for incoming mavlink messages
         msg = self.theConnection.recv_match()
@@ -99,12 +106,16 @@ class MAVHandler():
             elif(msg.value == self.ALERT_FIRE_ALERT or msg.value == self.ALERT_FIRE_STORED):
                 self.app.root.serialHandler.fireAlert = True
                 if(msg.value == self.ALERT_FIRE_ALERT):
-                    self.app.root.cameraFeed.ShowFireDetect()
+                    if(not(self.app.root.cameraFeed.mode == self.app.root.cameraFeed.MODE_FIREWAIT)):
+                        self.app.root.cameraFeed.ShowFireDetect()
                 #***invoke a HandleFireAlert method based on this flag***
             else:
                 print("warning: FireAlert content was not an expected enum, data may be corrupted")
         elif(msg.name == "CAM_DONE"):
-            self.app.root.cameraFeed.SaveData(4)#save data to file space 1 
+            self.app.root.cameraFeed.InterpolateImage()
+            self.app.root.cameraFeed.SaveData(7)#save data to file space 1 
+            self.app.root.cameraFeed.ShowImage(5)
+            
     def HandleRawIMU(self, msg):
         #print("accel data",msg.xacc,msg.yacc,msg.zacc)
         #print("gyro data",msg.xgyro,msg.ygyro,msg.zgyro)
@@ -129,6 +140,9 @@ class MAVHandler():
         #next 3 bytes are for index with payload[1] being LSB
         #remaining bytes are photo data 
         index = msg.payload[1] + msg.payload[2]*(2**8) + msg.payload[3]*(2**8)#decode index 
-        self.app.root.cameraFeed.LogData(index, msg.payload[4:msg.payload[0]+1])
+        camFeed = self.app.root.cameraFeed
+        if(not(camFeed.mode == camFeed.MODE_FIRELOAD)):
+            camFeed.ShowFireLoading()
+        camFeed.LogData(index, msg.payload[4:msg.payload[0]+1])
 
         

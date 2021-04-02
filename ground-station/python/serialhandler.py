@@ -7,8 +7,10 @@ import enum
 #user defined imports 
 import telemetry as telem
 
-
-
+class ParamSetMsg():
+    target_component = 0
+    param_id = 0
+    param_value = 0
 
 class SerialHandler():
     app = None
@@ -20,6 +22,8 @@ class SerialHandler():
     gamepadHandler = None
     mavHandler = None
     useMAV = True
+    msgQueue = []
+    msgqueueIter = 0#used to alternate between non critical messages and RC messages 
 
     #message buffers
     rx_buffer = None
@@ -55,10 +59,22 @@ class SerialHandler():
     
     def HandleSerial(self):
         if(self.isConnected):
-            if(self.useMAV == True):
+            if(self.useMAV):
                 if(True):
-                    #--send RC commands--
-                    self.mavHandler.SendRCData(self.gamepadHandler.rc1,self.gamepadHandler.rc2, self.gamepadHandler.rc3, self.gamepadHandler.rc4)
+                    if(not(self.msgQueue == None) and self.msgqueueIter and len(self.msgQueue) > 0):
+                        if(isinstance(self.msgQueue[0], ParamSetMsg)):
+                            msg = self.msgQueue[0]
+                            #print("sending msg from msg queue")
+                            #print(self.msgQueue[0])
+                            self.mavHandler.SendParamSet(msg.target_component, msg.param_id, msg.param_value)
+                            self.msgqueueIter = 0
+                            self.msgQueue.remove(self.msgQueue[0])
+                        else:
+                            print("WARNING: msg type in msgQueue not known")
+                    else:
+                        #--send RC commands--
+                        #self.mavHandler.SendRCData(self.gamepadHandler.rc1,self.gamepadHandler.rc2, self.gamepadHandler.rc3, self.gamepadHandler.rc4)
+                        self.msgqueueIter = 1
 
                     #--receive telemetry data--
                     self.mavHandler.HandleMessage()
@@ -78,5 +94,17 @@ class SerialHandler():
         telem.sendPacket(self.ser, message.encode('utf-8'))
 
     def sendMotorCommand(self, axisid, value):
+        #OLD - DOESNT USE MAVLINK 
         telem.sendPacket(self.ser, (str(axisid) +" "+ str(value)).encode('utf-8'))
+    def QueueParamSetMsg(self, targetComponent, paramId, paramValue):
+        paramSetMsg = ParamSetMsg()
+        paramSetMsg.target_component = targetComponent
+        paramSetMsg.param_id = paramId
+        paramSetMsg.param_value = paramValue
+        if(self.msgQueue == None):
+            self.msgQueue = [paramSetMsg]
+        else:
+            self.msgQueue.append(paramSetMsg)
+
+
  
